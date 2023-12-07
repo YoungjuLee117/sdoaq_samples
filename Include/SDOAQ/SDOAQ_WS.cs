@@ -270,14 +270,14 @@ namespace SDOAQ
 		public static extern eErrorCode SDOAQ_RegisterObjectiveChangedCallback(SDOAQ_ObjectiveChanged cbf);
 
 		/// <summary>
-		/// The calibration data is read from an external file.
+		/// The calibration data is read from an external file. Set up the calibration file after initialization is done.
 		/// </summary>
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		public static extern eErrorCode SDOAQ_SetCalibrationFile([MarshalAs(UnmanagedType.LPStr)] string sFilename);
 
 		/// <summary>
 		/// This function sets the calibration data for objetive that are not defined inside the dll.
-		/// The calibration data is read from an external file.
+		/// The calibration data is read from an external file. Set up the calibration file after initialization is done.
 		/// </summary>
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		public static extern eErrorCode SDOAQ_SetExternalCalibrationTable(

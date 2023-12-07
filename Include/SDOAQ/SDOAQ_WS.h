@@ -256,13 +256,13 @@ extern "C"
 	__declspec(dllexport) eErrorCode SDOAQ_RegisterObjectiveChangedCallback(SDOAQ_ObjectiveChanged cbf);
 
 	/// <summary>
-	/// The calibration data is read from an external file.
+	/// The calibration data is read from an external file. Set up the calibration file after initialization is done.
 	/// </summary>
 	__declspec(dllexport) eErrorCode SDOAQ_SetCalibrationFile(const char* sFilename);
 
 	/// <summary>
 	/// This function sets the calibration data for objetive that are not defined inside the dll.
-	/// The calibration data is read from an external file.
+	/// The calibration data is read from an external file. Set up the calibration file after initialization is done.
 	/// </summary>
 	__declspec(dllexport) eErrorCode SDOAQ_SetExternalCalibrationTable(
 		int allocatedSize,
