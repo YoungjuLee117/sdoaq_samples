@@ -27,6 +27,9 @@ These are sample programs that use the SDOAQ dll to acquire images and WSIO dll 
   * SdoaqEdof\SdoaqEdof.vcxproj: A sample program to acquire EDOF images. It includes calibration data settings, ROI, scan area, and algorithm-related parameter settings.
     ![image](https://github.com/YoungjuLee117/sdoaq_samples/assets/93625956/00c9c198-2503-4fe5-a511-08600ebf613a)
 
+  * SdoaqMultiFocus/SdoaqMultiFocus.vcxproj: A sample program to acquire multi-focus images. This is one of several ways to implement multi-focus. You can freely implement your own multi-fucos function through auto-focus and stack acquisition.
+    ![image](https://github.com/YoungjuLee117/sdoaq_samples/assets/93625956/3cad11ee-4d59-40ea-84f9-e0402ebad645)
+
   * SdoaqCameraFrameCallback\SdoaqCameraFrameCallback.vcxproj: A sample program that receives only the camera frame.
     ![image](https://github.com/YoungjuLee117/sdoaq_samples/assets/93625956/c16a239c-b3e9-4cf7-827d-ae7ff8add725)
 
