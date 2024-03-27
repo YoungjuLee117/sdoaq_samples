@@ -28,7 +28,7 @@ These are sample programs that use the SDOAQ dll to acquire images and WSIO dll 
     ![image](https://github.com/YoungjuLee117/sdoaq_samples/assets/93625956/00c9c198-2503-4fe5-a511-08600ebf613a)
 
   * SdoaqCameraFrameCallback\SdoaqCameraFrameCallback.vcxproj: A sample program that receives only the camera frame.
-    ![image](https://github.com/YoungjuLee117/sdoaq_samples/assets/93625956/c16a239c-b3e9-4cf7-827d-ae7ff8add725)
+    ![image](https://github.com/YoungjuLee117/sdoaq_samples/assets/93625956/9b71f640-72dd-4d4b-b497-1a34923308d1)
 
   * ⚠️ Set working directory to project directory.
   * ⚠️ The sample program simulates with saved image files.
