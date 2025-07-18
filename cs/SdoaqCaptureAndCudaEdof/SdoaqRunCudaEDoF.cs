@@ -13,7 +13,7 @@ using System.Diagnostics;
 
 namespace SdoaqEdof
 {
-	public partial class SdoaqRunEDoF : Form
+	public partial class SdoaqRunCudaEDoF : Form
 	{
 		private StringBuilder _logBuffer = new StringBuilder();
 		private object _lockLog = new object();
@@ -21,7 +21,11 @@ namespace SdoaqEdof
 
 		private SdoaqImageViewr _imgViewer;
 
-		public SdoaqRunEDoF()
+		private int _cudaAvailability;
+		private string _calibFileName;
+	
+
+		public SdoaqRunCudaEDoF()
 		{
 			InitializeComponent();
 			cmb_EdofResizeRatio.SelectedItem = "0.5";
@@ -34,6 +38,7 @@ namespace SdoaqEdof
 			_imgViewer.Set_SdoaqObj(GetSdoaqObj());
 
 			MySdoaq.LogReceived += Sdoaq_LogDataReceived;
+			MySdoaq.Initialized += Sdoaq_Initialized;
 		}
 
 		private void SdoaqEDoF_Load(object sender, EventArgs e)
@@ -46,10 +51,11 @@ namespace SdoaqEdof
 		private void SdoaqEDoF_FormClosed(object sender, FormClosedEventArgs e)
 		{
 			MySdoaq.LogReceived -= Sdoaq_LogDataReceived;
+			MySdoaq.Initialized -= Sdoaq_Initialized;
 
 			GetSdoaqObj()?.AcquisitionStop();
 
-			SDOAQ_EDOF_API.SDOAQ_EDOF_Finalize();
+			SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_FinalizeLibrary();
 
 			MySdoaq.DisposeStaticResouce();
 
@@ -65,7 +71,7 @@ namespace SdoaqEdof
 			//================================================================================================================
 			MySdoaq.SDOAQ_Initialize();
 
-			var version = SDOAQ_EDOF_API.SDOAQ_EDOF_GetVersion();
+			var version = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_GetVersion();
 			Write_Log($"SD EDoF Algorithm version = {version}");
 		}
 
@@ -97,6 +103,21 @@ namespace SdoaqEdof
 			}
 		}
 
+		private void Sdoaq_Initialized(object sender, SdoaqEventArgs e)
+		{
+			this.Invoke(() =>
+			{
+				if (e.ErrorCode == SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
+				{
+					_cudaAvailability = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_CheckAvailability();
+					Write_Log($"SD EDoF Algorithm version = {_cudaAvailability}");
+
+					if (_cudaAvailability < 0)
+						Write_Log("Your NVIDIA graphics card does not support CUDA-based EDoF processing. Please upgrade your graphics card to enable this feature.");
+				}				
+			});
+		}
+
 		private void Write_Log(string str)
 		{
 			Sdoaq_LogDataReceived(null, new LoggerEventArgs(str + Environment.NewLine));
@@ -104,18 +125,9 @@ namespace SdoaqEdof
 
 		private void btn_OpenCalibration_Click(object sender, EventArgs e)
 		{
-			string fullName = "";
 			if (openFile.ShowDialog() == DialogResult.OK)
 			{
-				fullName = openFile.FileName;
-
-				var rv_sdoaq = SDOAQ_API.SDOAQ_SetCalibrationFile(fullName);
-
-
-				//----------------------------------------------------------------------------
-				//		Specify the calibration file before proceeding.
-				//----------------------------------------------------------------------------
-				var rv_edof = SDOAQ_EDOF_API.SDOAQ_EDOF_InitializeFromCalibFile(fullName);
+				_calibFileName = openFile.FileName;
 			}
 		}
 
@@ -162,6 +174,16 @@ namespace SdoaqEdof
 				}
 			}
 
+			//================================================================================================================
+			// 
+			//		If you are operating both the vision system and a motion controller together,
+			//		this is the appropriate timing to move the motion controller, as the image capture has been completed.
+			//
+			//		Generate an EDoF image based on the captured images at this point.
+			//		You can either use the API provided by the SDOAQ library or run your own custom algorithm.
+			//
+			//================================================================================================================
+
 			//----------------------------------------------------------------------------
 			//
 			//		Starting point of the EDOF algorithm execution.
@@ -172,72 +194,89 @@ namespace SdoaqEdof
 			//
 			//----------------------------------------------------------------------------
 
-			SDOAQ_EDOF_API.SDOAQ_EDOF_FocalStackParams inParams = new SDOAQ_EDOF_API.SDOAQ_EDOF_FocalStackParams();
-			inParams.focus_measure = SDOAQ_EDOF_API.SDOAQ_EDOF_FocusMeasure.MODIFIED_LAPLACIAN;
-			inParams.image_num = focusList.Length;
-			inParams.image_width = acqParam.cameraRoiWidth;
-			inParams.image_height = acqParam.cameraRoiHeight;
-			inParams.image_offset_x = acqParam.cameraRoiLeft;
-			inParams.image_offset_y = acqParam.cameraRoiTop;
-			inParams.binning_x = 1;
-			inParams.binning_y = 1;
-			inParams.num_channel = camInfo.ColorByte; // depending on the captured image color
-			inParams.byte_per_channel = 1;
-			inParams.num_padding_bit = 0;
-			//inParams.roi_top = acqParam.cameraRoiTop;
-			//inParams.roi_left = acqParam.cameraRoiLeft;
-			//inParams.roi_width = inParams.image_width;
-			//inParams.roi_height = inParams.image_height;
+			if (_cudaAvailability < 0)
+			{
+				Write_Log("Your NVIDIA graphics card does not support CUDA-based EDoF processing. Please upgrade your graphics card to enable this feature.");
+				return;
+			}
+
+			SDOAQ_CUDA_EDOF_API.SDOAQ_CUDA_EDOF_Params edofParams = new SDOAQ_CUDA_EDOF_API.SDOAQ_CUDA_EDOF_Params();
+			edofParams.numMalsStep = focusList.Length;
+			edofParams.imageWidth = acqParam.cameraRoiWidth;
+			edofParams.imageHeight = acqParam.cameraRoiHeight;
+			edofParams.imageOffsetX = acqParam.cameraRoiLeft;
+			edofParams.imageOffsetY = acqParam.cameraRoiTop;
+			edofParams.pixelColorType = camInfo.ColorByte;
 
 			double.TryParse(cmb_EdofResizeRatio.SelectedItem.ToString(), out double resize_ratio);
-			inParams.resize_ratio = resize_ratio;
-
-			Int32.TryParse(txt_KernelSize.Text, out int pixelwise_kernel_size);
-			inParams.pixelwise_kernel_size = pixelwise_kernel_size;
+			edofParams.samplingMode = resize_ratio;
 
 			Int32.TryParse(txt_Iteration.Text, out int pixelwise_iteration);
-			inParams.pixelwise_iteration = pixelwise_iteration;
-
-			inParams.depthwise_kernel_size = -1;
+			edofParams.pixelwiseKernelIteration = pixelwise_iteration;			
 
 			Double.TryParse(txt_Threshold.Text, out double depth_quality_th);
-			inParams.depth_quality_th = depth_quality_th;
+			edofParams.depthThreshold = depth_quality_th;
 
-			inParams.bilateral_sigma_color = 6;
-			inParams.bilateral_sigma_space = 5;
-			inParams.num_thread = -1;
-			inParams.is_scale_correction_enabled = true;
-
+			edofParams.isScaleCorrectionEnabled = true;
 			Int32.TryParse(txt_ScaleStep.Text, out int dst_step);
-			inParams.scale_correction_dst_step = dst_step;
+			edofParams.scaleCorrectionDstStep = dst_step;
 
-			SDOAQ_EDOF_API.SDOAQ_EDOF_ImageParams edofParams = new SDOAQ_EDOF_API.SDOAQ_EDOF_ImageParams();
-			edofParams.is_allocated = true;
-			edofParams.image_width = inParams.image_width;
-			edofParams.image_height = inParams.image_height;
-			edofParams.image_offset_x = inParams.image_offset_x;
-			edofParams.image_offset_y = inParams.image_offset_y;
-			edofParams.binning_x = inParams.binning_x;
-			edofParams.binning_y = inParams.binning_y;
-			edofParams.num_channel = inParams.num_channel;
-			edofParams.byte_per_channel = inParams.byte_per_channel;
-			edofParams.num_padding_bit = inParams.num_padding_bit;
-			edofParams.is_floating_point = false;
-			edofParams.is_scale_correction_enabled = inParams.is_scale_correction_enabled;
-			edofParams.scale_correction_dst_step = inParams.scale_correction_dst_step;
+			// 1. Initialize EDoF algorithm library with EDoF parameter and calibration file
+			// Call SDOAQ_CUDAEDOF_InitializeLibrary() when calibration data or core parameters are changed.
+			// For updating certain tunable parameters at runtime, use SDOAQ_CUDAEDOF_UpdateParams() without reinitializing.
+			var rv_edof = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_InitializeLibrary(ref edofParams, _calibFileName);
+			if (0 > rv_edof)
+			{
+				Write_Log($"Check SDOAQ_EDOF_InitializeFromCalibFile Error Code[{rv_edof}]");
+				return;
+			}
+
+
+			// 2. Register memory with cudaHostRegister
+			for (int i = 0; i < focusList.Length; i++)
+			{
+				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_RegisterMemory(focusImagePointerList[i], sizeof(byte) * camInfo.ImgSize);
+			}
 
 			Stopwatch edofRun = new Stopwatch();
 			edofRun.Start();
+
+			// 3. Add focus stack image to the algorithm
+			for (int i = 0; i < focusList.Length; i++)
+			{
+				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_AddImage(focusImagePointerList[i], i);
+			}
+
+
+			// 4. Run EDoF algorithm and generate output image
 			var bufferEdofImage = new byte[camInfo.ImgSize];
-			var rv_edof = SDOAQ_EDOF_API.SDOAQ_EDOF_Run(ref inParams, focusImagePointerList, focusList, ref edofParams, bufferEdofImage);
-			edofRun.Stop();
-			Write_Log($"SDOAQ_EDOF_Run() takes {edofRun.Elapsed.TotalMilliseconds.ToString()} ms.");
+			unsafe
+			{
+				fixed (byte* p = bufferEdofImage)
+				{
+					IntPtr ptr = (IntPtr)p;
+
+					SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_RegisterMemory(ptr, sizeof(byte) * camInfo.ImgSize);
+					rv_edof = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_Run(ptr);
+
+					edofRun.Stop();
+					Write_Log($"SDOAQ_CUDAEDOF_Run() takes {edofRun.Elapsed.TotalMilliseconds.ToString()} ms.");
+
+					SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_UnregisterMemory(ptr);
+				}
+			}
+
+
+			// 5. Unregister memory with cudaHostUnregister
+			for (int i = 0; i < focusList.Length; i++)
+			{
+				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_UnregisterMemory(focusImagePointerList[i]);
+			}
 
 			var imgInfoList = new List<SdoaqImageInfo>();
 			if (rv_edof >= 0)
 			{
-				//Write_Log($"SDOAQ_EDOF_Run() completed.");				
-
+				//Write_Log("SDOAQ_EDOF_Run() completed.");
 				imgInfoList.Add(new SdoaqImageInfo("Edof",
 					acqParam.cameraRoiWidth, acqParam.cameraRoiHeight, camInfo.ColorByte,
 					bufferEdofImage));
@@ -247,7 +286,7 @@ namespace SdoaqEdof
 			else
 			{
 				Write_Log($"Check SDOAQ_EDOF_Run Error Code[{rv_edof}]");
-			}
+			}	
 		}
 
 		private void btn_SetROI_Click(object sender, EventArgs e)
@@ -264,12 +303,7 @@ namespace SdoaqEdof
 		{
 			//GetSdoaqObj()?.SetParam(SDOAQ_API.eParameterId.pi_edof_calc_resize_ratio, cmb_EdofResizeRatio.SelectedItem.ToString());
 		}
-
-		private void btn_SetKernelSize_Click(object sender, EventArgs e)
-		{
-			//GetSdoaqObj()?.SetParam(SDOAQ_API.eParameterId.pi_edof_calc_pixelwise_kernel_size, txt_KernelSize.Text);			
-		}
-
+		
 		private void btn_SetIteration_Click(object sender, EventArgs e)
 		{
 			//GetSdoaqObj()?.SetParam(SDOAQ_API.eParameterId.pi_edof_calc_pixelwise_iteration, txt_Iteration.Text);

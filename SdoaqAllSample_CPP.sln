@@ -23,6 +23,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SdoaqMultiLighting", "cpp\S
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SdoaqCaptureAndEdof", "cpp\SdoaqCaptureAndEdof\SdoaqRunEdof.vcxproj", "{ABFD6972-9DE9-4329-8462-439086B84527}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "SdoaqCaptureAndCudaEdof", "cpp\SdoaqCaptureAndCudaEdof\SdoaqRunCudaEdof.vcxproj", "{25CB385C-E1D4-41D2-BB53-E3510892D618}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -65,6 +67,10 @@ Global
 		{ABFD6972-9DE9-4329-8462-439086B84527}.Debug|x64.Build.0 = Debug|x64
 		{ABFD6972-9DE9-4329-8462-439086B84527}.Release|x64.ActiveCfg = Release|x64
 		{ABFD6972-9DE9-4329-8462-439086B84527}.Release|x64.Build.0 = Release|x64
+		{25CB385C-E1D4-41D2-BB53-E3510892D618}.Debug|x64.ActiveCfg = Debug|x64
+		{25CB385C-E1D4-41D2-BB53-E3510892D618}.Debug|x64.Build.0 = Debug|x64
+		{25CB385C-E1D4-41D2-BB53-E3510892D618}.Release|x64.ActiveCfg = Release|x64
+		{25CB385C-E1D4-41D2-BB53-E3510892D618}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

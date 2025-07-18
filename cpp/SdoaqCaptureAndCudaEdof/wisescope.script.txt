@@ -1,0 +1,126 @@
+#----------------------------------------------------------------------------------------------
+# DATE : 2024.07.22
+# BEGIN
+# SDOAQ-PROJECT STANDARD MAIN SCRIPT SAMPLE (V2.7)
+# This script file is a standard sample file. Please modify following items for your purpose.
+#   "DV" : Default Value.
+#----------------------------------------------------------------------------------------------
+
+
+#==============================================================================================
+### OPERATION
+ Product ID = wisescope
+
+ # When operating multi-WS, specify the number of WSM and write the prefix "WSI_#" to each script item.
+ # When operating single-WS, do not specify it.
+ # Number of WSM = 2
+
+ Image Manager Size GB = 1 # DV=1.0 , Unit:GB
+  
+ # Patch
+ # Patch = { item1 , item2 , ... }
+ #Patch = { 1251 }
+#----------------------------------------------------------------------------------------------
+
+
+#==============================================================================================
+### MALS
+ # MALS Device record Format     : {mals_model, mals_device, mals_metric_step or mals_depth_file, mals_metric_pixel}
+ # mals_model(string)            : NONE, AUTO, TPSU80, TPSU320, TPSU320S
+ # mals_device(string)           : AUTO / COMxx / Simul
+ # mals_metric_step(fixed-point number)  : Focus distance of one step, The +/- sign determines the direction of focus
+ # mals_metric_pixel(fixed-point number) : Distance of 1 pixel, unit is um.
+#----------------------------------------------------------------------------------------------
+ #MALS Device = { Auto , Auto , 2.0 , 1.0 }   # DV = { NONE , Simul , 0 , 0 }
+ MALS Device = { Auto , Simul , 1.8 , 1.0 }
+#----------------------------------------------------------------------------------------------
+
+
+#==============================================================================================
+### CAMERA
+ # Camera Model record format    : { if_name, detail_info }
+ # if_name(string)               : Simul / Simul-width-height-(color|bw)
+ #                               : GigE: Basler(Pylon,Pylon-GigE) / Vieworks(Vis-GigE) / HIK(Mvs,Mvs-GegE) / IMI(Neptune,Neptune-GigE) / Flir(Spinnaker) / Others(EBUS)
+ #                               : USB: Basler(Pylon,Pylon-USB) / HIK(Mvs,Mvs-USB) / IMI(Neptune,Neptune-USB) / Raytrix(Raycam) / PCO(Pco,Pco-USB)
+ #                               : CLink+Euresys: Basler(Multicam-ACA) / Sentech(Multicam-STC) / CIS(Multicam-CIS) / VIEWORKS(Multicam-VW) / HIKROBOT(Multicam-HIK)
+ #                               : CLink+Matrox: Basler(Milx-ACA) / Sentech(Milx-STC) / CIS(Milx-CIS) / VIEWORKS(Milx-VW) / HIKROBOT(Milx-HIK)
+ #                               : CoaXPress: Euresys(Coaxlink) / Matrox(Milx) / Basler(Pylon,Pylon-CXP)
+ # detail_info(string)           : -1(any)
+ #                               : Serial-no(string): (Pylon, Vis-GigE, EBUS, Multicam-ACA, Multicam-VW, Multicam-HIK, CoaxLink-*)
+ #                               : MAC-address(string): (Vis-GigE)
+ #                               : Grabber-id(00~99): Board-Index(MultiCam-*, CoaxLink-*) / USB-ID(HVSV5U) / NA(Milx-*)
+#----------------------------------------------------------------------------------------------
+ #Camera Model (V2) = { Pylon-USB , -1 }
+
+ # Camera Trigger Method
+ #                               : External / External-Camera / External-Grabber
+ #                               : Software / Software-Camera / Software-Grabber
+ #                               : TPSU / TPSU-Camera / TPSU-Grabber / TPSU-OD / TPSU-Camera-OD / TPSU-Grabber-OD
+ #Camera Trigger Method = TPSU-Camera   # DV = Software, Software / TPSU
+
+ #Camera TPSU Trigger Delay = -1
+ #Camera SW Trigger Delay   = -1
+ 
+ # Set the number of grabber card RX buffers that are optimized for your capture conditions.
+ # The capture time depends on image size, exposure time, trigger delay, etc.
+ #Camera Rx Buffer Number   = 4   # DV = 12(Multicam), 4(Milx)
+
+ #Camera Reverse X = false
+ #Camera Reverse Y = false
+ #Camera Gain = 0
+ #Pylon USB Line Number = Line2   # DV = Line2, none / Line2 / Line3 / both
+#----------------------------------------------------------------------------------------------
+ Camera Model (V2) = { Simul-2040-1086-color , -1 }
+ Camera Trigger Method = Software
+ Full Focus Simul Image = C:\\Simul.Zstack
+#----------------------------------------------------------------------------------------------
+
+
+#==============================================================================================
+### LIGHTING
+ # Lighting (V3) record format SINGLE  : {model, name, device, source, intensity, lighting_cam_exposure, lighting_cam_gain, max_exposure_time}
+ # Lighting (V3) record format GROUP   : {GROUP, name, group-algo, item-nums}
+ # Lighting (V3) record format GR.ITEM : {model, item-name, device, source, intensity, lighting_cam_exposure, lighting_cam_gain, max_exposure_time}
+ # model(string)                       : Null(External controlled)
+ #                                     : AUTO (Only Models LCBPWM and SDZEISS are detected)
+ #                                     : "Model1 & Model2 & Model3" (Only Models {LCBPWM, SDZEISS* and TPSU} are detected in order listed)
+ #                                     : SDZEISS / SDZEISS-NOSTROBE
+ #                                     : LCBPWM / TPSU
+ # name(string)                        : any string.
+ # item-name(string)                   : any string. The "^m" symbol is replaced with the group item number.
+ # item-nums(integer)                  : The number of group items.
+ # device(string)                      : Simul
+ #                                     : COM* / AUTO (model = SDZEISS-xxx, LCBPWM, TPSU)
+ #                                     : AUTO (Only COM port connected models {LCBPWM, SDZEISS* and TPSU} are detected)
+ # source(integer) - Single-channel    : Start from 0 ( LCBPWM / TPSU / NULL )
+ # source(integer) - Multi-channel     : (101~163), (1001~1511) or (10001~18191)
+ # intensity(integer)                  : 0~100 ( LCBPWM / SDZEISS )
+ #                                     : 0~999 ( others , only ON/OFF status. 0 means OFF other value means ON)
+ # lighting_cam_exposure               : -2 => UI value
+ # lighting_cam_gain(integer)          : 0~999, -1 => use "Camera Gain"
+ # max_exposure_time(integer)          : 0~10000000, -1 => 10000000
+#----------------------------------------------------------------------------------------------
+ #Lighting Device (V3) 1 = { TPSU , L , Auto ,  103 ,  1 , -2 , -1 , 1000000 }
+ #Lighting Device (V3) 1 attributes = { strobe = on }
+
+ #Lighting Device (V3) 1 = { GROUP , SDZEISS , UI , 8 }
+ #Lighting Device (V3) 1-1 = { SDZEISS-NOSTROBE , Sub^m , Auto  , 0 , 0 , -2 , -1 , 1000000 }
+ 
+ #Lighting Device (V3) 1 = { LCBPWM , L , Auto ,  0 ,  0 , -2 , -1 , 1000000 }
+ #Lighting Device (V3) 1 attributes = { strobe = on }
+
+ Lighting Device (V3) 1 = { Null , External , Simul ,  0 ,  0 , -2 , -1 , 1000000 }
+#----------------------------------------------------------------------------------------------
+
+
+#==============================================================================================
+### REGISTER
+ # Register Device record format : { register_name , register_model , register_device , address , size }
+ # register_name(string)         : GEN0, GEN1, GEN2,,,
+ #                               : LENSID
+ # register_model(string)        : Nikon-motorized(NIKON-MNC)
+ # register_device(string)       : Simul
+ #                               : COMxx / AUTO 
+#----------------------------------------------------------------------------------------------
+ Register Device 1 = { LENSID , None , Simul }
+#----------------------------------------------------------------------------------------------

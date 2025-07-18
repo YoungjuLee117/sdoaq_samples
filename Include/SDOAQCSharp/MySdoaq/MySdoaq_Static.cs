@@ -36,7 +36,8 @@ namespace SDOAQCSharp
 
         private static SDOAQ.SDOAQ_API.SDOAQ_LogCallback CallBack_SDOAQ_Log;
         private static SDOAQ.SDOAQ_API.SDOAQ_ErrorCallback CallBack_SDOAQ_Error;
-        private static SDOAQ.SDOAQ_API.SDOAQ_InitDoneCallback CallBack_InitDone;
+		private static SDOAQ.SDOAQ_API.SDOAQ_MoveokCallback CallBack_SDOAQ_MoveOk;
+		private static SDOAQ.SDOAQ_API.SDOAQ_InitDoneCallback CallBack_InitDone;
         private static SDOAQ.SDOAQ_API.SDOAQ_PlayCallbackEx CallBack_SDOAQ_PlayFocusStack;
         private static SDOAQ.SDOAQ_API.SDOAQ_PlayCallbackEx CallBack_SDOAQ_PlayEdof;
         private static SDOAQ.SDOAQ_API.SDOAQ_PlayAfCallbackEx2 CallBack_SDOAQ_PlayAf;
@@ -125,7 +126,14 @@ namespace SDOAQCSharp
             s_logger = null;
         }
 
-        public static string GetVersion()
+		public static bool SDOAQ_RegisterMoveOk()
+		{
+			var rv = SDOAQ_API.SDOAQ_RegisterMoveokCallback(CallBack_SDOAQ_MoveOk);
+
+			return rv == SDOAQ_API.eErrorCode.ecNoError;
+		}
+
+		public static string GetVersion()
         {
             return $"{SDOAQ_API.SDOAQ_GetMajorVersion()}.{SDOAQ_API.SDOAQ_GetMinorVersion()}.{SDOAQ_API.SDOAQ_GetPatchVersion()}";
         }
@@ -179,7 +187,8 @@ namespace SDOAQCSharp
         {
             CallBack_SDOAQ_Log = OnSdoaq_Log;
             CallBack_SDOAQ_Error = OnSdoaq_Error;
-            CallBack_InitDone = OnSdoaq_InitDone;
+			CallBack_SDOAQ_MoveOk = OnSdoaq_MoveOk;
+			CallBack_InitDone = OnSdoaq_InitDone;
             CallBack_SDOAQ_PlayFocusStack = OnSdoaq_PlayFocusStack;
             CallBack_SDOAQ_PlayEdof = OnSdoaq_PlayEdof;
             CallBack_SDOAQ_PlayAf = OnSdoaq_PlayAf;
@@ -214,7 +223,23 @@ namespace SDOAQCSharp
             WriteLog(Logger.emLogLevel.API, $"[Error]Error Code = {errorCode}, {pErrorMessage.ToString()}");
         }
 
-        private static void OnSdoaq_InitDone(SDOAQ_API.eErrorCode errorCode, StringBuilder pErrorMessage)
+		private static void OnSdoaq_MoveOk(SDOAQ_API.eErrorCode errorCode, IntPtr callbackUserData)
+		{			
+			WriteLog(Logger.emLogLevel.API, "OnSdoaq_MoveOk");
+
+			if (errorCode != SDOAQ_API.eErrorCode.ecNoError)
+			{
+				// Handle error:
+				// - retry image capture
+				// - skip this cycle
+				// - log and continue
+				return;
+			}
+
+			// Motion trigger logic here
+		}
+
+		private static void OnSdoaq_InitDone(SDOAQ_API.eErrorCode errorCode, StringBuilder pErrorMessage)
         {
             bool bInitDone = errorCode == SDOAQ_API.eErrorCode.ecNoError;
 
@@ -235,7 +260,7 @@ namespace SDOAQCSharp
                     bool bCamColor = false;
                     int fullFrameSizeX = 0;
                     int fullFrameSizeY = 0;
-                    int camBinning = 0;
+                    int camBinning = 1;
                     if (sdoaqObj.GetParam(SDOAQ_API.eParameterId.piCameraColor, out isWriteable, out paramValue))
                     {
                         bCamColor = int.Parse(paramValue) == 0; 
@@ -375,9 +400,9 @@ namespace SDOAQCSharp
                 {
                     int idx = idxRingBuffer + i + 1;
                     int size = (int)sdoaqObj._ringBuffer.Sizes[idx];
-                    float[] buffer = new float[size];
+					float[] buffer = new float[size];
 
-                    if (size > 0)
+					if (size > 0)
                     {
                         var ptrSrc = (float*)sdoaqObj._ringBuffer.Buffer[idx];
 

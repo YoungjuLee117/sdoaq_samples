@@ -214,6 +214,8 @@ namespace SdoaqApiTester
 		private void btn_Init_Click(object sender, EventArgs e)
 		{
 			MySdoaq.SDOAQ_Initialize();
+
+			MySdoaq.SDOAQ_RegisterMoveOk();
 		}
 
 		private void btn_Final_Click(object sender, EventArgs e)

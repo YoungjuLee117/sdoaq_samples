@@ -21,6 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SdoaqMultiFocus", "cs\Sdoaq
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SdoaqCaptureAndEdof", "cs\SdoaqCaptureAndEdof\SdoaqCaptureAndEdof.csproj", "{BBB3A4AE-B82F-4F45-9361-C085625D006E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SdoaqCaptureAndCudaEdof", "cs\SdoaqCaptureAndCudaEdof\SdoaqCaptureAndCudaEdof.csproj", "{E3B9FC86-9A18-4892-9CBF-C366D2E1AD5D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -63,6 +65,10 @@ Global
 		{BBB3A4AE-B82F-4F45-9361-C085625D006E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BBB3A4AE-B82F-4F45-9361-C085625D006E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BBB3A4AE-B82F-4F45-9361-C085625D006E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3B9FC86-9A18-4892-9CBF-C366D2E1AD5D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3B9FC86-9A18-4892-9CBF-C366D2E1AD5D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3B9FC86-9A18-4892-9CBF-C366D2E1AD5D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3B9FC86-9A18-4892-9CBF-C366D2E1AD5D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

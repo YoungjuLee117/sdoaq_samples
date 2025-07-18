@@ -1,5 +1,5 @@
 
-// SdoaqEdofDlg.h : header file
+// SdoaqCudaEdofDlg.h : header file
 //
 
 #pragma once
@@ -22,7 +22,7 @@ public:
 
 // Dialog Data
 #ifdef AFX_DESIGN_TIME
-	enum { IDD = IDD_SDOAQCPUEDOF_DIALOG };
+	enum { IDD = IDD_SDOAQCUDAEDOF_DIALOG };
 #endif
 
 protected:
@@ -49,11 +49,10 @@ public:
 	afx_msg void OnSdoaqSetROI();
 	afx_msg void OnSdoaqSetFocusSet();
 	afx_msg void OnSdoaqSetEdofResize();
-	afx_msg void OnSdoaqSetEdofKernelSize();
 	afx_msg void OnSdoaqSetEdofIteration();
 	afx_msg void OnSdoaqSetEdofThreshold();
 	afx_msg void OnSdoaqSetEdofScaleStep();
-	afx_msg void OnSdoaqCaptureAndRunEdof();
+	afx_msg void OnSdoaqCaptureAndRunCudaEdof();
 
 public:
 	struct tTestSet
@@ -109,13 +108,13 @@ public:
 		int m_nColorByte = COLORBYTES;
 	} SET;
 
-
+	int m_nCudaAvailability = false;
+	CString m_sCalibFileName;
 	std::vector<int> m_vFocusSet;
 	int m_nRingBufferSize = 3;
 	int m_nContiEdof = 0;
 
 	double m_resize_ratio = 0.5f;
-	int m_pixelwise_kernelSize = 5;
 	int m_pixelwise_iteration = 4;
 	double m_depth_quality_threshold = 1.0f;
 	int m_scale_ref_step = 160;

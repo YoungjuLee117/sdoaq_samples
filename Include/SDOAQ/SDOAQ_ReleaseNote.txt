@@ -167,12 +167,17 @@
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
  SDOAQ_v2.8.1  2025.05.30    YoungJu Lee    - Added EDoF-Beta algorithm (SDOAQ_AM70_DLL_EDOF_BETA)
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
- SDOAQ_v2.8.2  2025.06.09    YoungJu Lee    - Added algorithm interface (SDOAQ_EDOF.h)
+ SDOAQ_v2.8.2  2025.06.09    YoungJu Lee    - Added EDoF algorithm interface (SDOAQ_EDOF.h)
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
  SDOAQ_v2.8.3  2025.06.12    YoungJu Lee    - Added z250609 algorithm (SDOAQ_AM71_DLL_z250609)
                                             - Updated internal dependency Library (must use WSIO v3.33 or later)
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
- SDOAQ_v2.8.4  2025.06.18    YoungJu Lee    - Updated the parameter setting APIs related to the Euresys Coaxlink grabber
-                                            - Added support for Vieworks camera VC-50MX-C30 and VC-65MX-C31
+ SDOAQ_v2.8.4  2025.06.18    YoungJu Lee    - Updated the parameter setting low-level APIs related to the Euresys Coaxlink grabber
+                                            - Added support for the Vieworks cameras VC-50MX-C30 and VC-65MX-C31
                                             - Added per-algorithm parameter IDs with support for availability checks
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ SDOAQ_v2.8.5  2025.07.01    YoungJu Lee    - Added support for the Vieworks cameras VC-25MX-C81 and VC-65MX-M35
+                                            - Added support for camera-specific white balance control. Currently available for USB Pylon, Clink, and select verified CXP cameras
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ SDOAQ_v2.8.6  2025.07.15    YoungJu Lee    - Added CUDA-based EDoF algorithm interface
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------

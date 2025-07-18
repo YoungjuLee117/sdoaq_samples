@@ -1,11 +1,11 @@
 
-// SdoaqEdofDlg.cpp : implementation file
+// SdoaqCudaEdofDlg.cpp : implementation file
 //
 
 #include "pch.h"
 #include "framework.h"
-#include "SdoaqEdof.h"
-#include "SdoaqEdofDlg.h"
+#include "SdoaqRunCudaEdof.h"
+#include "SdoaqRunCudaEdofDlg.h"
 #include "afxdialogex.h"
 
 #ifdef _DEBUG
@@ -17,7 +17,6 @@
 static WSIOVOID g_hViewer = NULL;
 //----------------------------------------------------------------------------
 static void g_SDOAQ_InitDoneCallback(eErrorCode errorCode, char* pErrorMessage);
-static void g_PlayEdofCallbackEx(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData);
 //----------------------------------------------------------------------------
 static void g_LogLine(LPCTSTR sFormat, ...)
 {
@@ -41,7 +40,7 @@ static void g_LogLine(LPCTSTR sFormat, ...)
 //============================================================================
 
 CSdoaqEdofDlg::CSdoaqEdofDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_SDOAQEDOF_DIALOG, pParent)
+	: CDialogEx(IDD_SDOAQCUDAEDOF_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -57,18 +56,14 @@ BEGIN_MESSAGE_MAP(CSdoaqEdofDlg, CDialogEx)
 	ON_WM_SIZE()
 	ON_WM_CLOSE()
 	ON_MESSAGE(EUM_INITDONE, OnInitDone)
-	ON_MESSAGE(EUM_RECEIVE_EDOF, OnReceiveEdof)
 	ON_BN_CLICKED(IDC_SET_CALIBRATION, OnSdoaqSetCalibrationFile)
 	ON_BN_CLICKED(IDC_SET_ROI, OnSdoaqSetROI)
 	ON_BN_CLICKED(IDC_SET_FOCUS_SET, OnSdoaqSetFocusSet)
 	ON_BN_CLICKED(IDC_SET_EDOF_RESIZE_RATIO, OnSdoaqSetEdofResize)
-	ON_BN_CLICKED(IDC_SET_EDOF_KERNEL_SIZE, OnSdoaqSetEdofKernelSize)
 	ON_BN_CLICKED(IDC_SET_EDOF_ITERATION, OnSdoaqSetEdofIteration)
 	ON_BN_CLICKED(IDC_SET_EDOF_THRESHOLD, OnSdoaqSetEdofThreshold)
 	ON_BN_CLICKED(IDC_SET_EDOF_SCALE_STEP, OnSdoaqSetEdofScaleStep)
-	ON_BN_CLICKED(IDC_ACQ_EDOF, OnSdoaqSingleShotEdof)
-	ON_BN_CLICKED(IDC_CONTI_EDOF, OnSdoaqPlayEdof)
-	ON_BN_CLICKED(IDC_STOP_EDOF, OnSdoaqStopEdof)
+	ON_BN_CLICKED(IDC_RUN_EDOF, OnSdoaqCaptureAndRunCudaEdof)
 END_MESSAGE_MAP()
 
 
@@ -85,10 +80,16 @@ BOOL CSdoaqEdofDlg::OnInitDialog()
 
 	// TODO: Add extra initialization here
 	g_LogLine(_T("================================================"));
-	g_LogLine(_T(" SDOAQ EDoF Sample"));
+	g_LogLine(_T(" SDOAQ Run CUDA EDoF Algorithm Sample"));
 	g_LogLine(_T("================================================"));
 
-	g_LogLine(_T("start initialization..."));
+
+	//================================================================================================================
+	//
+	// If you capture images directly without using SDOAQ library, you do not need to perform library initialization.
+	//
+	//================================================================================================================
+	g_LogLine(_T("start SDOAQ initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);
 	if (ecNoError != rv_sdoaq)
 	{
@@ -103,10 +104,11 @@ BOOL CSdoaqEdofDlg::OnInitDialog()
 		g_LogLine(_T("WSUT_IV_CreateImageViewer() returns error(%d)."), rv_wsio);
 	}
 
+	g_LogLine(_T("wsio dll version is \"%s\""), (CString)::WSIO_GetVersion(FALSE));
+
 	SetDlgItemText(IDC_EDIT_ROI, _T("0,0,2040,1086"));
 	SetDlgItemText(IDC_EDIT_FOCUS_SET, _T("0-319-35"));
 	SetDlgItemText(IDC_EDIT_EDOF_RESIZE_RATIO, _T("0.5"));
-	SetDlgItemText(IDC_EDIT_EDOF_KERNEL_SIZE, _T("5"));
 	SetDlgItemText(IDC_EDIT_EDOF_ITERATION, _T("8"));
 	SetDlgItemText(IDC_EDIT_EDOF_THRESHOLD, _T("1.0"));
 	SetDlgItemText(IDC_EDIT_EDOF_SCALE_STEP, _T("160"));
@@ -180,6 +182,7 @@ void CSdoaqEdofDlg::OnSize(UINT nType, int cx, int cy)
 void CSdoaqEdofDlg::OnClose()
 {
 	// TODO: Add your message handler code here and/or call default
+	(void)::SDOAQ_CUDAEDOF_FinalizeLibrary();
 	(void)::SDOAQ_Finalize();
 	(void)::WSUT_IV_DestroyImageViewer(g_hViewer);
 
@@ -210,21 +213,27 @@ LRESULT CSdoaqEdofDlg::OnInitDone(WPARAM wErrorCode, LPARAM lpMessage)
 	{
 		g_LogLine(_T("InitDoneCallback() %s"), pMessage ? *pMessage : _T(""));
 
-		const int ver_major = ::SDOAQ_GetMajorVersion();
-		const int ver_minor = ::SDOAQ_GetMinorVersion();
-		const int ver_patch = ::SDOAQ_GetPatchVersion();
-		g_LogLine(_T("sdoaq dll version is \"%d.%d.%d\""), ver_major, ver_minor, ver_patch);
+		const int ver = ::SDOAQ_CUDAEDOF_GetVersion();
+		g_LogLine(_T("sdoaq cuda edof dll version is \"%d\""), ver);
+
+		m_nCudaAvailability = ::SDOAQ_CUDAEDOF_CheckAvailability();
+		g_LogLine(_T("sdoaq cuda availability  \"%d\""), m_nCudaAvailability);
+
+		if (m_nCudaAvailability < 0)
+		{
+			g_LogLine(_T("Your NVIDIA graphics card does not support CUDA-based EDoF processing. Please upgrade your graphics card to enable this feature."));
+			return 0;
+		}
 
 		SET.m_nColorByte = IsMonoCameraInstalled() ? MONOBYTES : COLORBYTES;
 
 		OnSdoaqSetROI();
 		OnSdoaqSetFocusSet();
 		OnSdoaqSetEdofResize();
-		OnSdoaqSetEdofKernelSize();
 		OnSdoaqSetEdofIteration();
 		OnSdoaqSetEdofThreshold();
 		OnSdoaqSetEdofScaleStep();
-		::SDOAQ_SetIntParameterValue(pi_edof_is_scale_correction_enabled, 1);
+		//::SDOAQ_SetIntParameterValue(pi_edof_is_scale_correction_enabled, 1);
 		//::SDOAQ_SetIntParameterValue(pi_edof_algorithm_method, 67);
 	}
 	else
@@ -241,40 +250,13 @@ LRESULT CSdoaqEdofDlg::OnInitDone(WPARAM wErrorCode, LPARAM lpMessage)
 }
 
 //----------------------------------------------------------------------------
-LRESULT CSdoaqEdofDlg::OnReceiveEdof(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry)
-{
-	if (ecNoError != wErrorCode)
-	{
-		g_LogLine(_T("SDOAQ_PlayCallback() returns error(%d)."), (int)wErrorCode);
-	}
-	else if (SET.rb.active)
-	{
-		(void)UpdateLastMessage(m_hWnd, EUM_RECEIVE_EDOF, wErrorCode, lLastFilledRingBufferEntry);
-
-		auto AFP = SET.afp;
-		const int base_order = (lLastFilledRingBufferEntry % (int)SET.rb.numsBuf)*EDOFRECSIZE; //m_nRingBufferSize
-
-		++m_nContiEdof;
-		ImageViewer("EDoF", m_nContiEdof, SET, SET.rb.ppBuf[base_order + 0]);
-	}
-
-	return 0;
-}
-
-//----------------------------------------------------------------------------
 void CSdoaqEdofDlg::OnSdoaqSetCalibrationFile(void)
 {
 	CString sFilter = _T("calibration file (*.csv)|*.csv|");
 	CFileDialog dlg(TRUE, _T("cvs"), NULL, OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT, sFilter);
 	if (dlg.DoModal() == IDOK)
 	{
-		eErrorCode rv_sdoaq = ::SDOAQ_SetCalibrationFile(CT2A(dlg.GetPathName().GetBuffer()));
-		if (ecNoError != rv_sdoaq)
-		{
-			g_LogLine(_T("SDOAQ_SetCalibrationFile() returns error(%d)."), rv_sdoaq);
-			return;
-		}
-
+		m_sCalibFileName = dlg.GetPathName().GetBuffer();
 		g_LogLine(_T("calibration file (%s) is set"), dlg.GetFileName());
 	}
 }
@@ -396,15 +378,15 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofResize()
 	CString sEdofResize;
 	GetDlgItemText(IDC_EDIT_EDOF_RESIZE_RATIO, sEdofResize);
 
-	auto resize_ratio = _ttof(sEdofResize);
+	m_resize_ratio = _ttof(sEdofResize);
 
 	double dbMin, dbMax;
 	auto rv_sdoaq = ::SDOAQ_GetDblParameterRange(pi_edof_calc_resize_ratio, &dbMin, &dbMax);
 	if (ecNoError == rv_sdoaq)
 	{
-		if (resize_ratio >= dbMin && resize_ratio <= dbMax)
+		if (m_resize_ratio >= dbMin && m_resize_ratio <= dbMax)
 		{
-			::SDOAQ_SetDblParameterValue(pi_edof_calc_resize_ratio, resize_ratio);
+			//::SDOAQ_SetDblParameterValue(pi_edof_calc_resize_ratio, m_resize_ratio);
 		}
 		else
 		{
@@ -418,47 +400,20 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofResize()
 }
 
 //----------------------------------------------------------------------------
-void CSdoaqEdofDlg::OnSdoaqSetEdofKernelSize()
-{
-	CString sEdofKernelSize;
-	GetDlgItemText(IDC_EDIT_EDOF_KERNEL_SIZE, sEdofKernelSize);
-
-	auto KernelSize = _ttoi(sEdofKernelSize);
-
-	int nMin, nMax;
-	auto rv_sdoaq = ::SDOAQ_GetIntParameterRange(pi_edof_calc_pixelwise_kernel_size, &nMin, &nMax);
-	if (ecNoError == rv_sdoaq)
-	{
-		if (KernelSize >= nMin && KernelSize <= nMax)
-		{
-			::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_kernel_size, KernelSize);
-		}
-		else
-		{
-			g_LogLine(_T("set EDoF pixelwise kernel size: value is out of range(%d ~ %d)"), nMin, nMax);
-		}
-	}
-	else
-	{
-		g_LogLine(_T("SDOAQ_GetIntParameterRange(pi_edof_calc_pixelwise_kernel_size) returns error(%d)."), rv_sdoaq);
-	}
-}
-
-//----------------------------------------------------------------------------
 void CSdoaqEdofDlg::OnSdoaqSetEdofIteration()
 {
 	CString sIteration;
 	GetDlgItemText(IDC_EDIT_EDOF_ITERATION, sIteration);
 
-	auto iteration = _ttoi(sIteration);
+	m_pixelwise_iteration = _ttoi(sIteration);
 
 	int nMin, nMax;
 	auto rv_sdoaq = ::SDOAQ_GetIntParameterRange(pi_edof_calc_pixelwise_iteration, &nMin, &nMax);
 	if (ecNoError == rv_sdoaq)
 	{
-		if (iteration >= nMin && iteration <= nMax)
+		if (m_pixelwise_iteration >= nMin && m_pixelwise_iteration <= nMax)
 		{
-			::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_iteration, iteration);
+			//::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_iteration, m_pixelwise_iteration);
 		}
 		else
 		{
@@ -477,15 +432,15 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofThreshold()
 	CString sEdofThreshold;
 	GetDlgItemText(IDC_EDIT_EDOF_THRESHOLD, sEdofThreshold);
 
-	auto threshold = _ttof(sEdofThreshold);
+	m_depth_quality_threshold = _ttof(sEdofThreshold);
 
 	double dbMin, dbMax;
 	auto rv_sdoaq = SDOAQ_GetDblParameterRange(pi_edof_depth_quality_th, &dbMin, &dbMax);
 	if (ecNoError == rv_sdoaq)
 	{
-		if (threshold >= dbMin && threshold <= dbMax)
+		if (m_depth_quality_threshold >= dbMin && m_depth_quality_threshold <= dbMax)
 		{
-			::SDOAQ_SetDblParameterValue(pi_edof_depth_quality_th, threshold);
+			//::SDOAQ_SetDblParameterValue(pi_edof_depth_quality_th, m_depth_quality_threshold);
 		}
 		else
 		{
@@ -500,15 +455,15 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofScaleStep()
 	CString sEdofScaleStep;
 	GetDlgItemText(IDC_EDIT_EDOF_SCALE_STEP, sEdofScaleStep);
 
-	auto scaleReferStep = _ttoi(sEdofScaleStep);
+	m_scale_ref_step = _ttoi(sEdofScaleStep);
 
 	int nMin, nMax;
 	auto rv_sdoaq = ::SDOAQ_GetIntParameterRange(pi_edof_scale_correction_dst_step, &nMin, &nMax);
 	if (ecNoError == rv_sdoaq)
 	{
-		if (scaleReferStep >= nMin && scaleReferStep <= nMax)
+		if (m_scale_ref_step >= nMin && m_scale_ref_step <= nMax)
 		{
-			::SDOAQ_SetIntParameterValue(pi_edof_scale_correction_dst_step, scaleReferStep);
+			//::SDOAQ_SetIntParameterValue(pi_edof_scale_correction_dst_step, m_scale_ref_step);
 		}
 		else
 		{
@@ -522,8 +477,13 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofScaleStep()
 }
 
 //----------------------------------------------------------------------------
-void CSdoaqEdofDlg::OnSdoaqSingleShotEdof()
+void CSdoaqEdofDlg::OnSdoaqCaptureAndRunCudaEdof()
 {
+	if (m_nCudaAvailability < 0)
+	{
+		return;
+	}
+
 	if (SET.rb.active)
 	{
 		return;
@@ -537,147 +497,129 @@ void CSdoaqEdofDlg::OnSdoaqSingleShotEdof()
 	copy(m_vFocusSet.begin(), m_vFocusSet.end(), FOCUS.vFocusSet.begin());
 
 	int* pPositions = new int[FOCUS.numsFocus];
-	for (int pos = 0; pos < FOCUS.numsFocus; pos++)
+	unsigned char** ppFocusImages = new unsigned char*[FOCUS.numsFocus];
+	size_t* pFocusImageBufferSizes = new size_t[FOCUS.numsFocus];
+
+	for (size_t pos = 0; pos < FOCUS.numsFocus; pos++)
 	{
 		pPositions[pos] = FOCUS.vFocusSet[pos];
-	}
 
-	unsigned char* pEdofImageBuffer = new unsigned char[SET.ImgSize()];
-	size_t edofImageBufferSize = SET.ImgSize();
+		auto size = SET.ImgSize();
+		ppFocusImages[pos] = new unsigned char[size];
+		pFocusImageBufferSizes[pos] = size;
+	}
 
 	const auto tick_begin = GetTickCount64();
 	AFP.callbackUserData = (void*)::GetTickCount64();
-	eErrorCode rv_sdoaq = ::SDOAQ_SingleShotEdofEx(
+	const eErrorCode rv_sdoaq = ::SDOAQ_SingleShotFocusStackEx(
 		&AFP,
 		pPositions, (int)FOCUS.numsFocus,
-		NULL, 0,
-		pEdofImageBuffer, edofImageBufferSize,
-		NULL, 0,
-		NULL, 0,
-		NULL, 0
+		ppFocusImages, pFocusImageBufferSizes
 	);
+
+	//----------------------------------------------------------------------------
+	//
+	//		Starting point of the EDOF algorithm execution.
+	//
+	//		Make sure to set each parameter to a suitable value.
+	//
+	//		Don't forget to specify the calibration file before proceeding.
+	//
+	//----------------------------------------------------------------------------
 
 	if (ecNoError == rv_sdoaq)
 	{
-		const auto tick_end = GetTickCount64();
-		//g_LogLine(_T("SDOAQ_SingleShotEdofEx() takes : %llu ms / %d imgs"), tick_end - tick_begin, FOCUS.numsFocus);
+		SDOAQ_CUDA_EDOF_Params edofParams;
+		edofParams.numMalsStep = (int)FOCUS.numsFocus;
+		edofParams.imageWidth = AFP.cameraRoiWidth;
+		edofParams.imageHeight = AFP.cameraRoiHeight;
+		edofParams.imageOffsetX = AFP.cameraRoiLeft;
+		edofParams.imageOffsetY = AFP.cameraRoiTop;
+		edofParams.pixelColorType = SET.m_nColorByte;
+		edofParams.samplingMode = m_resize_ratio;
+		edofParams.pixelwiseKernelIteration = m_pixelwise_iteration;
+		edofParams.depthThreshold = m_depth_quality_threshold;
+		edofParams.stepInterval = FOCUS.numsFocus > 1 ? FOCUS.vFocusSet[1] - FOCUS.vFocusSet[0] : 0;
+		edofParams.firstStep = FOCUS.vFocusSet[0];
+		edofParams.isScaleCorrectionEnabled = true; // true or false
+		edofParams.scaleCorrectionDstStep = m_scale_ref_step;
+		
 
-		++m_nContiEdof;
-
-		if (pEdofImageBuffer && edofImageBufferSize)
+		// 1. Initialize EDoF algorithm library with EDoF parameter and calibration file
+		// Call SDOAQ_CUDA_InitializeEdofLibrary() when calibration data or core parameters are changed.
+		// For updating certain tunable parameters at runtime, use SDOAQ_CUDA_UpdateParams() without reinitializing.
+		auto edof_rv = ::SDOAQ_CUDAEDOF_InitializeLibrary(edofParams, CT2A(m_sCalibFileName));
+		if (0 > edof_rv)
 		{
-			ImageViewer("EDoF", m_nContiEdof, SET, pEdofImageBuffer);
+			g_LogLine(_T("SDOAQ_CUDA_InitializeEdofLibrary() returns error(%d)."), edof_rv);
+			//return;
+		}
+		
+
+		// 2. Register memory with cudaHostRegister
+		for (int i = 0; i < FOCUS.numsFocus; i++)
+		{
+			(void)::SDOAQ_CUDAEDOF_RegisterMemory(ppFocusImages[i], sizeof(unsigned char) * SET.ImgSize());
+		}
+
+		unsigned char* pEdofImageBuffer = new unsigned char[SET.ImgSize()];
+		auto edofImageBufferSize = SET.ImgSize();
+		(void)::SDOAQ_CUDAEDOF_RegisterMemory(pEdofImageBuffer, sizeof(unsigned char) * edofImageBufferSize);
+
+		clock_t runStart = clock();
+
+		// 3. Add focus stack image to the algorithm
+		for (int i = 0; i < FOCUS.numsFocus; i++)
+		{
+			(void)::SDOAQ_CUDAEDOF_AddImage(ppFocusImages[i], i);
+		}		
+		
+
+		// 4. Run EDoF algorithm and generate output image
+		edof_rv = ::SDOAQ_CUDAEDOF_Run(pEdofImageBuffer);
+		clock_t runEnd = clock();
+
+		if (ecNoError <= edof_rv)
+		{
+			++m_nContiEdof;
+
+			if (pEdofImageBuffer && edofImageBufferSize)
+			{
+				ImageViewer("CUDA EDoF", m_nContiEdof, SET, pEdofImageBuffer);
+			}
+			else
+			{
+				ImageViewer("CUDA EDoF", m_nContiEdof);
+			}
+			g_LogLine(_T("SDOAQ_CUDA_RunEdof() total takes %d ms"), runEnd - runStart);
 		}
 		else
 		{
-			ImageViewer("EDoF", m_nContiEdof);
+			g_LogLine(_T("SDOAQ_CUDA_RunEdof() returns error(%d)."), edof_rv);
 		}
+
+
+		// 5. Unregister memory with cudaHostUnregister
+		(void)::SDOAQ_CUDAEDOF_UnregisterMemory(pEdofImageBuffer);
+		for (int i = 0; i < FOCUS.numsFocus; i++)
+		{
+			(void)::SDOAQ_CUDAEDOF_UnregisterMemory(ppFocusImages[i]);
+		}
+
+		delete[] pEdofImageBuffer;
 	}
 	else
 	{
 		g_LogLine(_T("SDOAQ_SingleShotEdofEx() returns error(%d)."), rv_sdoaq);
 	}
-
-	delete[] pEdofImageBuffer;
+	
+	delete[] pFocusImageBufferSizes;
+	for (size_t pos = 0; pos < FOCUS.numsFocus; pos++)
+	{
+		delete[] ppFocusImages[pos];
+	}
+	delete[] ppFocusImages;
 	delete[] pPositions;
-}
-
-//----------------------------------------------------------------------------
-void CSdoaqEdofDlg::OnSdoaqPlayEdof()
-{
-	if (SET.rb.active)
-	{
-		return;
-	}
-
-	auto& AFP = SET.afp;
-	auto& FOCUS = SET.focus;
-
-	FOCUS.numsFocus = m_vFocusSet.size();
-	FOCUS.vFocusSet.resize(FOCUS.numsFocus);
-	copy(m_vFocusSet.begin(), m_vFocusSet.end(), FOCUS.vFocusSet.begin());
-
-	int* pPositions = new int[FOCUS.numsFocus];
-	for (int pos = 0; pos < FOCUS.numsFocus; pos++)
-	{
-		pPositions[pos] = FOCUS.vFocusSet[pos];
-	}
-
-	if (SET.rb.ppBuf)
-	{
-		SET.ClearBuffer();
-	}
-
-	size_t edofImageBufferSize = SET.ImgSize();
-
-	SET.rb.numsBuf = EDOFRECSIZE * m_nRingBufferSize;
-	SET.rb.ppBuf = (void**)new unsigned char*[SET.rb.numsBuf];
-	SET.rb.pSizes = new size_t[SET.rb.numsBuf];
-
-	for (size_t uidx = 0; uidx + EDOFRECSIZE - 1 < SET.rb.numsBuf;)
-	{
-		SET.rb.ppBuf[uidx] = edofImageBufferSize ? (void*)new unsigned char[edofImageBufferSize] : NULL;
-		SET.rb.pSizes[uidx] = edofImageBufferSize;
-		uidx++; // EDOF
-
-		SET.rb.ppBuf[uidx] = NULL;
-		SET.rb.pSizes[uidx] = 0;
-		uidx++; // StepMap
-
-		SET.rb.ppBuf[uidx] = NULL;
-		SET.rb.pSizes[uidx] = 0;
-		uidx++; // QualityMap
-
-		SET.rb.ppBuf[uidx] = NULL;
-		SET.rb.pSizes[uidx] = 0;
-		uidx++; // HeightMap
-
-		SET.rb.ppBuf[uidx] = NULL;
-		SET.rb.pSizes[uidx] = 0;
-		uidx++; // PointCloud
-	}
-
-	AFP.callbackUserData = (void*)::GetTickCount64();
-	eErrorCode rv_sdoaq = ::SDOAQ_PlayEdofEx(
-		&AFP,
-		g_PlayEdofCallbackEx,
-		pPositions, (int)FOCUS.numsFocus,
-		m_nRingBufferSize,
-		SET.rb.ppBuf,
-		SET.rb.pSizes
-	);
-	if (ecNoError == rv_sdoaq)
-	{
-		SET.rb.active = true;
-	}
-	else
-	{
-		g_LogLine(_T("SDOAQ_PlayEdofEx() returns error(%d)."), rv_sdoaq);
-	}
-
-	delete[] pPositions;
-
-	GetDlgItem(IDC_SET_CALIBRATION)->EnableWindow(FALSE);
-	GetDlgItem(IDC_SET_ROI)->EnableWindow(FALSE);
-	GetDlgItem(IDC_SET_FOCUS_SET)->EnableWindow(FALSE);
-}
-
-//----------------------------------------------------------------------------
-void CSdoaqEdofDlg::OnSdoaqStopEdof()
-{
-	SET.rb.active = false;
-
-	const eErrorCode rv_sdoaq = ::SDOAQ_StopEdof();
-	if (ecNoError != rv_sdoaq)
-	{
-		g_LogLine(_T("SDOAQ_StopEdof() returns error(%d)."), rv_sdoaq);
-	}
-
-	SET.ClearBuffer();
-
-	GetDlgItem(IDC_SET_CALIBRATION)->EnableWindow(TRUE);
-	GetDlgItem(IDC_SET_ROI)->EnableWindow(TRUE);
-	GetDlgItem(IDC_SET_FOCUS_SET)->EnableWindow(TRUE);
 }
 
 //----------------------------------------------------------------------------
@@ -712,16 +654,5 @@ static void g_SDOAQ_InitDoneCallback(eErrorCode errorCode, char* pErrorMessage)
 	if (theApp.m_pMainWnd)
 	{
 		theApp.m_pMainWnd->PostMessageW(EUM_INITDONE, (WPARAM)errorCode, (LPARAM)NewWString(pErrorMessage));
-	}
-}
-
-//----------------------------------------------------------------------------
-static void g_PlayEdofCallbackEx(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData)
-{
-	if (theApp.m_pMainWnd)
-	{
-		theApp.m_pMainWnd->PostMessageW(EUM_RECEIVE_EDOF, (WPARAM)errorCode, (LPARAM)lastFilledRingBufferEntry);
-
-		static void* g_prev = NULL; if (g_prev != callbackUserData) { g_prev = callbackUserData; g_LogLine(_T("EDOF callback 0x%I64X"), (unsigned long long)callbackUserData); }
 	}
 }

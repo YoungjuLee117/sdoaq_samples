@@ -15,9 +15,9 @@ using System.Text;
 	========================================================================================================================================================
 	Version     date      Author         Descriptions
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
-	 1.00   2020-03-05  YoungJu Lee     - The illumination operates in continuous mode and the maximum intensity is limited to 30											
+	 1.00   2020.03.05  YoungJu Lee     - The illumination operates in continuous mode and the maximum intensity is limited to 30											
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
-	 1.10   2020-03-16  YoungJu Lee     - Fix the rotation of the illumination pattern
+	 1.10   2020.03.16  YoungJu Lee     - Fix the rotation of the illumination pattern
 										- Add the default calibration setting functions for each calibration element
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	 1.20   2020.03.31  YoungJu Lee		- Remove limit on the memory usage
@@ -177,14 +177,19 @@ using System.Text;
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	 2.8.1  2025.05.30  YoungJu Lee		- Added EDoF-Beta algorithm (SDOAQ_AM70_DLL_EDOF_BETA)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
-	 2.8.2  2025.06.09  YoungJu Lee		- Added algorithm interface (SDOAQ_EDOF.h)
+	 2.8.2  2025.06.09  YoungJu Lee		- Added EDoF algorithm interface (SDOAQ_EDOF.h)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	 2.8.3  2025.06.12  YoungJu Lee		- Added z250609 algorithm (SDOAQ_AM71_DLL_z250609)
 										- Updated internal dependency Library (must use WSIO v3.33 or later)
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
-	 2.8.4  2025.06.18  YoungJu Lee		- Updated the parameter setting APIs related to the Euresys Coaxlink grabber
-										- Added support for Vieworks camera VC-50MX-C30 and VC-65MX-C31
+	 2.8.4  2025.06.18  YoungJu Lee		- Updated the parameter setting low-level APIs related to the Euresys Coaxlink grabber
+										- Added support for the Vieworks cameras VC-50MX-C30 and VC-65MX-C31
 										- Added per-algorithm parameter IDs with support for availability checks
+	--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 2.8.5  2025.07.01  YoungJu Lee		- Added support for the Vieworks cameras VC-25MX-C81 and VC-65MX-M35
+										- Added support for camera-specific white balance control. Currently available for USB Pylon, Clink, and select verified CXP cameras
+	--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 2.8.6  2025.07.15  YoungJu Lee		- Added CUDA-based EDoF algorithm interface
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 
@@ -839,8 +844,9 @@ namespace SDOAQ
 			piFeatureAutoWhiteBalance = 79,     // I - R
 			/// <summary>Gets whether auto-illuminate function is supported.</summary>
 			piFeatureAutoIlluminate = 80,       // I - R
-			/// <summary>Gets whether binning feature is supported.</summary>
-			piFeatureBinning = 87,              // I - R
+
+			/// <summary>Gets whether binning feature is supported.</summary>			
+			/* deprecated. Instead, use piCameraBinning */ piFeatureBinning = 87,              // I - R
 
 			/// <summary>By specifying a log level, only log messages with a higher severity level than the specified log level are provided.</summary>
 			piLogLevel = 92,                    // I - R/W	 (log severity)
@@ -900,6 +906,10 @@ namespace SDOAQ
 		public const int SDOAQ_AM71_DLL_z250609 = 71;           // private release
 
 		// gets information about parameter
+		// The correct value is read after the SDOAQ_Initialize API completes.
+
+		// This checks whether the parameterID is valid in the current hardware configuration.
+		// It's not just about whether the PID is defined, but whether the PID allows for valid read/write operations—meaning it can actually interact with the hardware properly.
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		public static extern eErrorCode SDOAQ_IsParameterAvailable(eParameterId parameterId, ref int pIsAvailable);
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]

@@ -1,8 +1,8 @@
 //{{NO_DEPENDENCIES}}
 // Microsoft Visual C++ generated include file.
-// Used by SdoaqRunEdof.rc
+// Used by SdoaqRunCudaEdof.rc
 //
-#define IDD_SDOAQCPUEDOF_DIALOG         102
+#define IDD_SDOAQCUDAEDOF_DIALOG        102
 #define IDR_MAINFRAME                   128
 #define IDC_IMAGE                       1001
 #define IDC_INITIALIZE                  1002

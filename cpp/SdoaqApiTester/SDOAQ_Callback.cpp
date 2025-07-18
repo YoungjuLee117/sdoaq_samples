@@ -80,7 +80,24 @@ void __stdcall g_MoveokCallback(eErrorCode errorCode, void* callbackUserData)
 {
 	if (theApp.m_pMainWnd)
 	{
-		static void* g_prev = NULL; if (g_prev != callbackUserData) { g_prev = callbackUserData; callback_test_log(_T("MOVEOK"), errorCode, callbackUserData); }
+		static void* g_prev = NULL;
+		if (g_prev != callbackUserData)
+		{
+			g_prev = callbackUserData;			
+		}
+
+		callback_test_log(_T("MoveOK"), errorCode, callbackUserData);
+
+		if (ecNoError != errorCode)		
+		{
+			// Handle error:
+			// - retry image capture
+			// - skip this cycle
+			// - log and continue
+			return;
+		}
+		
+		// Motion trigger logic here
 	}
 }
 

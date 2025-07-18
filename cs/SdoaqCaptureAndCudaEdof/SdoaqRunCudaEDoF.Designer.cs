@@ -1,6 +1,6 @@
 ﻿namespace SdoaqEdof
 {
-    partial class SdoaqRunEDoF
+    partial class SdoaqRunCudaEDoF
     {
         /// <summary>
         /// 필수 디자이너 변수입니다.
@@ -29,11 +29,11 @@
         private void InitializeComponent()
         {
 			this.components = new System.ComponentModel.Container();
-			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SdoaqRunEDoF));
+			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SdoaqRunCudaEDoF));
 			this.tlp_Main = new System.Windows.Forms.TableLayoutPanel();
 			this.pnl_Controls = new System.Windows.Forms.Panel();
 			this.txt_Log = new System.Windows.Forms.RichTextBox();
-			this.btn_RunEDoF = new System.Windows.Forms.Button();
+			this.btn_RunCudaEDoF = new System.Windows.Forms.Button();
 			this.groupBox2 = new System.Windows.Forms.GroupBox();
 			this.cmb_EdofResizeRatio = new System.Windows.Forms.ComboBox();
 			this.btn_SetScaleStep = new System.Windows.Forms.Button();
@@ -45,9 +45,6 @@
 			this.btn_SetIteration = new System.Windows.Forms.Button();
 			this.label5 = new System.Windows.Forms.Label();
 			this.txt_Iteration = new System.Windows.Forms.TextBox();
-			this.btn_SetKernelSize = new System.Windows.Forms.Button();
-			this.label4 = new System.Windows.Forms.Label();
-			this.txt_KernelSize = new System.Windows.Forms.TextBox();
 			this.btn_SetResizeRatio = new System.Windows.Forms.Button();
 			this.label3 = new System.Windows.Forms.Label();
 			this.groupBox1 = new System.Windows.Forms.GroupBox();
@@ -86,7 +83,7 @@
 			// pnl_Controls
 			// 
 			this.pnl_Controls.Controls.Add(this.txt_Log);
-			this.pnl_Controls.Controls.Add(this.btn_RunEDoF);
+			this.pnl_Controls.Controls.Add(this.btn_RunCudaEDoF);
 			this.pnl_Controls.Controls.Add(this.groupBox2);
 			this.pnl_Controls.Controls.Add(this.groupBox1);
 			this.pnl_Controls.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -100,22 +97,22 @@
 			this.txt_Log.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-			this.txt_Log.Location = new System.Drawing.Point(11, 401);
+			this.txt_Log.Location = new System.Drawing.Point(11, 390);
 			this.txt_Log.Margin = new System.Windows.Forms.Padding(2);
 			this.txt_Log.Name = "txt_Log";
-			this.txt_Log.Size = new System.Drawing.Size(575, 173);
+			this.txt_Log.Size = new System.Drawing.Size(575, 184);
 			this.txt_Log.TabIndex = 14;
 			this.txt_Log.Text = "";
 			// 
-			// btn_RunEDoF
+			// btn_RunCudaEDoF
 			// 
-			this.btn_RunEDoF.Location = new System.Drawing.Point(11, 353);
-			this.btn_RunEDoF.Name = "btn_RunEDoF";
-			this.btn_RunEDoF.Size = new System.Drawing.Size(575, 35);
-			this.btn_RunEDoF.TabIndex = 11;
-			this.btn_RunEDoF.Text = "Capture and Run EDoF";
-			this.btn_RunEDoF.UseVisualStyleBackColor = true;
-			this.btn_RunEDoF.Click += new System.EventHandler(this.btn_RunEDoF_Click);
+			this.btn_RunCudaEDoF.Location = new System.Drawing.Point(11, 334);
+			this.btn_RunCudaEDoF.Name = "btn_RunCudaEDoF";
+			this.btn_RunCudaEDoF.Size = new System.Drawing.Size(575, 39);
+			this.btn_RunCudaEDoF.TabIndex = 11;
+			this.btn_RunCudaEDoF.Text = "Capture and Run CUDA EDoF";
+			this.btn_RunCudaEDoF.UseVisualStyleBackColor = true;
+			this.btn_RunCudaEDoF.Click += new System.EventHandler(this.btn_RunEDoF_Click);
 			// 
 			// groupBox2
 			// 
@@ -129,14 +126,11 @@
 			this.groupBox2.Controls.Add(this.btn_SetIteration);
 			this.groupBox2.Controls.Add(this.label5);
 			this.groupBox2.Controls.Add(this.txt_Iteration);
-			this.groupBox2.Controls.Add(this.btn_SetKernelSize);
-			this.groupBox2.Controls.Add(this.label4);
-			this.groupBox2.Controls.Add(this.txt_KernelSize);
 			this.groupBox2.Controls.Add(this.btn_SetResizeRatio);
 			this.groupBox2.Controls.Add(this.label3);
 			this.groupBox2.Location = new System.Drawing.Point(11, 144);
 			this.groupBox2.Name = "groupBox2";
-			this.groupBox2.Size = new System.Drawing.Size(575, 201);
+			this.groupBox2.Size = new System.Drawing.Size(575, 171);
 			this.groupBox2.TabIndex = 1;
 			this.groupBox2.TabStop = false;
 			this.groupBox2.Text = "Live-compatible EDoF Parameters";
@@ -156,7 +150,7 @@
 			// 
 			// btn_SetScaleStep
 			// 
-			this.btn_SetScaleStep.Location = new System.Drawing.Point(516, 166);
+			this.btn_SetScaleStep.Location = new System.Drawing.Point(516, 133);
 			this.btn_SetScaleStep.Name = "btn_SetScaleStep";
 			this.btn_SetScaleStep.Size = new System.Drawing.Size(50, 25);
 			this.btn_SetScaleStep.TabIndex = 25;
@@ -167,7 +161,7 @@
 			// label7
 			// 
 			this.label7.AutoSize = true;
-			this.label7.Location = new System.Drawing.Point(12, 171);
+			this.label7.Location = new System.Drawing.Point(12, 138);
 			this.label7.Name = "label7";
 			this.label7.Size = new System.Drawing.Size(329, 15);
 			this.label7.TabIndex = 23;
@@ -175,7 +169,7 @@
 			// 
 			// txt_ScaleStep
 			// 
-			this.txt_ScaleStep.Location = new System.Drawing.Point(350, 167);
+			this.txt_ScaleStep.Location = new System.Drawing.Point(350, 134);
 			this.txt_ScaleStep.Name = "txt_ScaleStep";
 			this.txt_ScaleStep.Size = new System.Drawing.Size(160, 23);
 			this.txt_ScaleStep.TabIndex = 24;
@@ -183,7 +177,7 @@
 			// 
 			// btn_SetThreshold
 			// 
-			this.btn_SetThreshold.Location = new System.Drawing.Point(516, 132);
+			this.btn_SetThreshold.Location = new System.Drawing.Point(516, 99);
 			this.btn_SetThreshold.Name = "btn_SetThreshold";
 			this.btn_SetThreshold.Size = new System.Drawing.Size(50, 25);
 			this.btn_SetThreshold.TabIndex = 22;
@@ -194,7 +188,7 @@
 			// label6
 			// 
 			this.label6.AutoSize = true;
-			this.label6.Location = new System.Drawing.Point(12, 137);
+			this.label6.Location = new System.Drawing.Point(12, 104);
 			this.label6.Name = "label6";
 			this.label6.Size = new System.Drawing.Size(182, 15);
 			this.label6.TabIndex = 20;
@@ -202,7 +196,7 @@
 			// 
 			// txt_Threshold
 			// 
-			this.txt_Threshold.Location = new System.Drawing.Point(350, 133);
+			this.txt_Threshold.Location = new System.Drawing.Point(350, 100);
 			this.txt_Threshold.Name = "txt_Threshold";
 			this.txt_Threshold.Size = new System.Drawing.Size(160, 23);
 			this.txt_Threshold.TabIndex = 21;
@@ -210,7 +204,7 @@
 			// 
 			// btn_SetIteration
 			// 
-			this.btn_SetIteration.Location = new System.Drawing.Point(516, 98);
+			this.btn_SetIteration.Location = new System.Drawing.Point(516, 65);
 			this.btn_SetIteration.Name = "btn_SetIteration";
 			this.btn_SetIteration.Size = new System.Drawing.Size(50, 25);
 			this.btn_SetIteration.TabIndex = 19;
@@ -221,7 +215,7 @@
 			// label5
 			// 
 			this.label5.AutoSize = true;
-			this.label5.Location = new System.Drawing.Point(12, 103);
+			this.label5.Location = new System.Drawing.Point(12, 70);
 			this.label5.Name = "label5";
 			this.label5.Size = new System.Drawing.Size(238, 15);
 			this.label5.TabIndex = 17;
@@ -229,39 +223,12 @@
 			// 
 			// txt_Iteration
 			// 
-			this.txt_Iteration.Location = new System.Drawing.Point(350, 99);
+			this.txt_Iteration.Location = new System.Drawing.Point(350, 66);
 			this.txt_Iteration.Name = "txt_Iteration";
 			this.txt_Iteration.Size = new System.Drawing.Size(160, 23);
 			this.txt_Iteration.TabIndex = 18;
 			this.txt_Iteration.Tag = "8";
 			this.txt_Iteration.Text = "8";
-			// 
-			// btn_SetKernelSize
-			// 
-			this.btn_SetKernelSize.Location = new System.Drawing.Point(516, 64);
-			this.btn_SetKernelSize.Name = "btn_SetKernelSize";
-			this.btn_SetKernelSize.Size = new System.Drawing.Size(50, 25);
-			this.btn_SetKernelSize.TabIndex = 16;
-			this.btn_SetKernelSize.Text = "Set";
-			this.btn_SetKernelSize.UseVisualStyleBackColor = true;
-			this.btn_SetKernelSize.Click += new System.EventHandler(this.btn_SetKernelSize_Click);
-			// 
-			// label4
-			// 
-			this.label4.AutoSize = true;
-			this.label4.Location = new System.Drawing.Point(12, 69);
-			this.label4.Name = "label4";
-			this.label4.Size = new System.Drawing.Size(245, 15);
-			this.label4.TabIndex = 14;
-			this.label4.Text = "pixel-wise kernel size (range 3~5)";
-			// 
-			// txt_KernelSize
-			// 
-			this.txt_KernelSize.Location = new System.Drawing.Point(350, 65);
-			this.txt_KernelSize.Name = "txt_KernelSize";
-			this.txt_KernelSize.Size = new System.Drawing.Size(160, 23);
-			this.txt_KernelSize.TabIndex = 15;
-			this.txt_KernelSize.Text = "5";
 			// 
 			// btn_SetResizeRatio
 			// 
@@ -381,7 +348,7 @@
 			// 
 			this.openFile.FileName = "openFileDialog1";
 			// 
-			// SdoaqRunEDoF
+			// SdoaqRunCudaEDoF
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -390,8 +357,8 @@
 			this.Font = new System.Drawing.Font("Consolas", 9.75F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
 			this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
 			this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-			this.Name = "SdoaqRunEDoF";
-			this.Text = "SDOAQ Run EDoF Sample";
+			this.Name = "SdoaqRunCudaEDoF";
+			this.Text = "SDOAQ Run CUDA EDoF Sample";
 			this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.SdoaqEDoF_FormClosed);
 			this.Load += new System.EventHandler(this.SdoaqEDoF_Load);
 			this.tlp_Main.ResumeLayout(false);
@@ -428,10 +395,7 @@
         private System.Windows.Forms.Button btn_SetIteration;
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.TextBox txt_Iteration;
-        private System.Windows.Forms.Button btn_SetKernelSize;
-        private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.TextBox txt_KernelSize;
-        private System.Windows.Forms.Button btn_RunEDoF;
+        private System.Windows.Forms.Button btn_RunCudaEDoF;
         private System.Windows.Forms.RichTextBox txt_Log;
         private SDOAQCSharp.Component.SdoPanel pnl_Viewer;
         private System.Windows.Forms.Timer tmr_LogUpdate;

@@ -40,7 +40,7 @@ static void g_LogLine(LPCTSTR sFormat, ...)
 //============================================================================
 
 CSdoaqEdofDlg::CSdoaqEdofDlg(CWnd* pParent /*=nullptr*/)
-	: CDialogEx(IDD_SDOAQEDOF_DIALOG, pParent)
+	: CDialogEx(IDD_SDOAQCPUEDOF_DIALOG, pParent)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -85,9 +85,11 @@ BOOL CSdoaqEdofDlg::OnInitDialog()
 	g_LogLine(_T("================================================"));
 
 
-	//----------------------------------------------------------------------------
+	//================================================================================================================
+	//
 	// If you capture images directly without using SDOAQ library, you do not need to perform library initialization.
-	//----------------------------------------------------------------------------
+	//
+	//================================================================================================================
 	g_LogLine(_T("start SDOAQ initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);
 	if (ecNoError != rv_sdoaq)
@@ -225,8 +227,8 @@ LRESULT CSdoaqEdofDlg::OnInitDone(WPARAM wErrorCode, LPARAM lpMessage)
 		OnSdoaqSetEdofIteration();
 		OnSdoaqSetEdofThreshold();
 		OnSdoaqSetEdofScaleStep();
-		::SDOAQ_SetIntParameterValue(pi_edof_is_scale_correction_enabled, 1);
-		::SDOAQ_SetIntParameterValue(pi_edof_algorithm_method, 56);
+		//::SDOAQ_SetIntParameterValue(pi_edof_is_scale_correction_enabled, 1);
+		//::SDOAQ_SetIntParameterValue(pi_edof_algorithm_method, 56);
 	}
 	else
 	{
@@ -385,7 +387,7 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofResize()
 	{
 		if (m_resize_ratio >= dbMin && m_resize_ratio <= dbMax)
 		{
-			::SDOAQ_SetDblParameterValue(pi_edof_calc_resize_ratio, m_resize_ratio);
+			//::SDOAQ_SetDblParameterValue(pi_edof_calc_resize_ratio, m_resize_ratio);
 		}
 		else
 		{
@@ -412,7 +414,7 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofKernelSize()
 	{
 		if (m_pixelwise_kernelSize >= nMin && m_pixelwise_kernelSize <= nMax)
 		{
-			::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_kernel_size, m_pixelwise_kernelSize);
+			//::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_kernel_size, m_pixelwise_kernelSize);
 		}
 		else
 		{
@@ -439,7 +441,7 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofIteration()
 	{
 		if (m_pixelwise_iteration >= nMin && m_pixelwise_iteration <= nMax)
 		{
-			::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_iteration, m_pixelwise_iteration);
+			//::SDOAQ_SetIntParameterValue(pi_edof_calc_pixelwise_iteration, m_pixelwise_iteration);
 		}
 		else
 		{
@@ -466,7 +468,7 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofThreshold()
 	{
 		if (m_depth_quality_threshold >= dbMin && m_depth_quality_threshold <= dbMax)
 		{
-			::SDOAQ_SetDblParameterValue(pi_edof_depth_quality_th, m_depth_quality_threshold);
+			//::SDOAQ_SetDblParameterValue(pi_edof_depth_quality_th, m_depth_quality_threshold);
 		}
 		else
 		{
@@ -489,7 +491,7 @@ void CSdoaqEdofDlg::OnSdoaqSetEdofScaleStep()
 	{
 		if (m_scale_ref_step >= nMin && m_scale_ref_step <= nMax)
 		{
-			::SDOAQ_SetIntParameterValue(pi_edof_scale_correction_dst_step, m_scale_ref_step);
+			//::SDOAQ_SetIntParameterValue(pi_edof_scale_correction_dst_step, m_scale_ref_step);
 		}
 		else
 		{
@@ -538,6 +540,15 @@ void CSdoaqEdofDlg::OnSdoaqCaptureAndRunEdof()
 		ppFocusImages, pFocusImageBufferSizes
 	);
 
+	//----------------------------------------------------------------------------
+	//
+	//		Starting point of the EDOF algorithm execution.
+	//
+	//		Make sure to set each parameter to a suitable value.
+	//
+	//		Don't forget to specify the calibration file before proceeding.
+	//
+	//----------------------------------------------------------------------------
 
 	if (ecNoError == rv_sdoaq)
 	{
@@ -582,9 +593,12 @@ void CSdoaqEdofDlg::OnSdoaqCaptureAndRunEdof()
 		edof_image_params.is_scale_correction_enabled = input_params.is_scale_correction_enabled;
 		edof_image_params.scale_correction_dst_step = input_params.scale_correction_dst_step;
 
-		unsigned char* pEdofImageBuffer = new unsigned char[SET.ImgSize()];;
+		unsigned char* pEdofImageBuffer = new unsigned char[SET.ImgSize()];
 		auto edofImageBufferSize = SET.ImgSize();
+
+		clock_t runStart = clock();
 		auto edof_rv = ::SDOAQ_EDOF_Run(&input_params, ppFocusImages, (unsigned int*)pPositions, &edof_image_params, pEdofImageBuffer);
+		clock_t runEnd = clock();
 
 		if (ecNoError <= edof_rv)
 		{
@@ -598,6 +612,7 @@ void CSdoaqEdofDlg::OnSdoaqCaptureAndRunEdof()
 			{
 				ImageViewer("EDoF", m_nContiEdof);
 			}
+			g_LogLine(_T("SDOAQ_EDOF_Run() takes %d ms"), runEnd - runStart);
 		}
 		else
 		{
