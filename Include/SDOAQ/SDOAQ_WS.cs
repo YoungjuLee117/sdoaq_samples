@@ -1018,16 +1018,38 @@ namespace SDOAQ
 			/// </summary>
 			public IntPtr callbackUserData;
 
-            public AcquisitionFixedParametersEx(int cameraRoiLeft = 0, int cameraRoiTop = 0,  int cameraRoiWidth = 0, int cameraRoiHeight = 0, int cameraBinning = 0, int version = 3)
-            {
+
+			public void Reset(int cameraRoiLeft = 0, int cameraRoiTop = 0, int cameraRoiWidth = 0, int cameraRoiHeight = 0, int cameraBinning = 1, int version = 3)
+			{
                 this.ver = version;
-                this.cameraRoiTop = cameraRoiLeft;
-                this.cameraRoiLeft = cameraRoiTop;
+                this.cameraRoiLeft = cameraRoiLeft;
+                this.cameraRoiTop = cameraRoiTop;
                 this.cameraRoiWidth = cameraRoiWidth;
                 this.cameraRoiHeight = cameraRoiHeight;
                 this.cameraBinning = cameraBinning;
                 this.callbackUserData = IntPtr.Zero;
             }
+
+			public void SetCallBackUserData(IntPtr callBackUserData)
+			{
+				this.callbackUserData = callBackUserData;
+			}
+
+			public void SetCameraRoi(int cameraRoiLeft, int cameraRoiTop, int cameraRoiWidth, int cameraRoiHeight)
+			{
+				this.cameraRoiLeft = cameraRoiLeft;
+				this.cameraRoiTop = cameraRoiTop;
+				this.cameraRoiWidth = cameraRoiWidth;
+				this.cameraRoiHeight = cameraRoiHeight;
+			}
+
+			public static AcquisitionFixedParametersEx Create(int cameraRoiLeft = 0, int cameraRoiTop = 0, int cameraRoiWidth = 0, int cameraRoiHeight = 0, int cameraBinning = 1, int version = 3)
+			{
+				var acqPararm = new AcquisitionFixedParametersEx();
+				acqPararm.Reset(cameraRoiLeft, cameraRoiTop, cameraRoiWidth, cameraRoiHeight, cameraBinning, version);
+				return acqPararm;
+			}
+
         };		
 		[StructLayout(LayoutKind.Sequential)]
 		/* deprecated. Instead, use AcquisitionFixedParametersEx */public struct AcquisitionFixedParameters{public int cameraRoiTop;public int cameraRoiLeft;public int cameraRoiWidth;public int cameraRoiHeight;public int cameraBinning;};		
@@ -1472,7 +1494,7 @@ namespace SDOAQ
 
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		public static extern eErrorCode SDOAQ_PlayAFEx(
-				AcquisitionFixedParametersEx[] pAcquisitionParams,
+				ref AcquisitionFixedParametersEx pAcquisitionParams,
 				SDOAQ_PlayAfCallbackEx2 afFinishedCallback,
 				int[] pPositions, int positionsCount,
 				int ringBufferSize,

@@ -53,7 +53,7 @@
             this.tmr_LogUpdate = new System.Windows.Forms.Timer(this.components);
             this.tlp_Main = new System.Windows.Forms.TableLayoutPanel();
             this.pnl_View = new System.Windows.Forms.Panel();
-            this.pnl_Viewer = new SDOAQCSharp.Component.SdoPanel();
+            this.pnl_Viewer = new SDOAQNet.Component.SdoPanel();
             this.pnl_Controls = new System.Windows.Forms.Panel();
             this.gpb_Controls.SuspendLayout();
             this.tlp_Main.SuspendLayout();
@@ -359,7 +359,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Timer tmr_LogUpdate;
-        private SDOAQCSharp.Component.SdoPanel pnl_Viewer;
+        private SDOAQNet.Component.SdoPanel pnl_Viewer;
         private System.Windows.Forms.TableLayoutPanel tlp_Main;
         private System.Windows.Forms.Panel pnl_View;
         private System.Windows.Forms.Panel pnl_Controls;

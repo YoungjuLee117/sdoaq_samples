@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using System.Windows.Forms;
-
-using SDOAQ;
-using SDOAQCSharp.Tool;
-using SDOAQCSharp;
-using SDOAQCSharp.Component;
 using System.Threading.Tasks;
-using BrightIdeasSoftware;
+using System.Windows.Forms;
 using System.Drawing;
 using System.Reflection;
+
+using SDOAQNet;
+using SDOAQNet.Component;
+using SDOAQNet.Tool;
+using SDOAQ;
+
+using BrightIdeasSoftware;
+
 
 namespace SdoaqMultiFocus
 {
@@ -18,7 +20,7 @@ namespace SdoaqMultiFocus
     {
         private StringBuilder _logBuffer = new StringBuilder();
         private object _lockLog = new object();
-        private Dictionary<int, MySdoaq> _sdoaqObjList = null;
+        private Dictionary<int, SdoaqController> _sdoaqObjList = null;
 
         private SdoaqImageViewr _imgViewer;
         private ObjectListView _olvMuiltiFocusItemList;
@@ -35,7 +37,7 @@ namespace SdoaqMultiFocus
             _imgViewer.Dock = DockStyle.Fill;
 
             pnl_Viewer.Controls.Add(_imgViewer);
-            _sdoaqObjList = MySdoaq.LoadScript();
+            _sdoaqObjList = SdoaqController.LoadScript();
             _imgViewer.Set_SdoaqObj(GetSdoaqObj());
 
             _olvMuiltiFocusItemList = new ObjectListView();
@@ -49,13 +51,13 @@ namespace SdoaqMultiFocus
                 cmb_Param_func.Items.Add(val.ToString());
             }
 
-            MySdoaq.LogReceived += Sdoaq_LogDataReceived;
-            MySdoaq.Initialized += Sdoaq_Initialized;
+            SdoaqController.LogReceived += Sdoaq_LogDataReceived;
+            SdoaqController.Initialized += Sdoaq_Initialized;
             
             tmr_LogUpdate.Start();
         }
 
-        private MySdoaq GetSdoaqObj()
+        private SdoaqController GetSdoaqObj()
         {
             return _sdoaqObjList[0];
         }
@@ -279,20 +281,20 @@ namespace SdoaqMultiFocus
 
         private void SdoaqAutoFocus_Load(object sender, EventArgs e)
         {
-            MySdoaq.SDOAQ_Initialize();
+            SdoaqController.SDOAQ_Initialize(false);
 
             ResetItemList();
         }
         
         private void SdoaqAutoFocus_FormClosed(object sender, FormClosedEventArgs e)
         {
-            MySdoaq.LogReceived -= Sdoaq_LogDataReceived;
+            SdoaqController.LogReceived -= Sdoaq_LogDataReceived;
 
             GetSdoaqObj()?.AcquisitionStop();
 
-            MySdoaq.DisposeStaticResouce();
+            SdoaqController.DisposeStaticResouce();
             
-            Task.Run(() => { MySdoaq.SDOAQ_Finalize(); });
+            Task.Run(() => { SdoaqController.SDOAQ_Finalize(); });
         }
 
         private void olv_SelectionChanged(object sender, EventArgs e)

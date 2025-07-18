@@ -9,8 +9,8 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 using SDOWSIO;
-using SDOAQCSharp.Tool;
-using SDOAQCSharp;
+using SDOAQNet;
+using SDOAQNet.Tool;
 
 namespace SdoaqMultiCameraFrameCallback
 {
@@ -18,7 +18,7 @@ namespace SdoaqMultiCameraFrameCallback
     {
         private int _tickFrameUpdate = 0;
         private int _skipFrame = 0;
-        private MyCamera _myCamObj;
+        private SdoaqController _camObj;
 
         private const int FRAME_UPDATE_TIME_INTERVAL = 100;
         public CamViewer()
@@ -28,27 +28,29 @@ namespace SdoaqMultiCameraFrameCallback
             CreateViewPanel(pb_CamImage, "Main viewer");
         }
 
-        public void Set_CamObject(MyCamera camObj)
+        public void Set_CamObject(SdoaqController camObj)
         {
-            if (_myCamObj != null)
+            if (_camObj != null)
             {
-                _myCamObj.CallBackMsgLoop -= Cam_CallBackMsgLoop;
+                _camObj.CallBackMessageProcessed -= CamObj_CallBackMessageProcessed;
             }
 
-            _myCamObj = camObj;
-            _myCamObj.CallBackMsgLoop += Cam_CallBackMsgLoop;
+            _camObj = camObj;
+            _camObj.CallBackMessageProcessed += CamObj_CallBackMessageProcessed;
         }
+
+        
 
         public void Update_CamParam()
         {
-            if (_myCamObj == null)
+            if (_camObj == null)
             {
                 return;
             }
 
             this.Invoke(new MethodInvoker(() =>
             {
-                var camObj = _myCamObj;
+                var camObj = _camObj as ICamera;
 
                 _skipFrame = 0;
 
@@ -78,7 +80,7 @@ namespace SdoaqMultiCameraFrameCallback
                     , WSIO.UTIL.WSUTIVOPMODE.WSUTIVOPMODE_VISION
                     | WSIO.UTIL.WSUTIVOPMODE.WSUTIVOPMODE_INFOOSD);
 
-            WSIO.UTIL.WSUT_IV_SetColor(hwnd, WSIO.UTIL.WSUTIVRESOURCE.WSUTIVRESOURCE_OUTERFRAME, Utils.RGB(70, 130, 180));
+            WSIO.UTIL.WSUT_IV_SetColor(hwnd, WSIO.UTIL.WSUTIVRESOURCE.WSUTIVRESOURCE_OUTERFRAME, ImageHelper.RGB(70, 130, 180));
 
             ctrl.Tag = hwnd;
         }
@@ -91,25 +93,25 @@ namespace SdoaqMultiCameraFrameCallback
             }
         }
 
-        private void Cam_CallBackMsgLoop((MyCamera.CallBackMessage msg, object[] objs) item)
+        private void CamObj_CallBackMessageProcessed(object sender, SdoaqController.CallBackMessageEventArgs e)
         {
-            switch (item.msg)
+            switch (e.Message)
             {
-                case MyCamera.CallBackMessage.Frame:
+                case SdoaqController.emCallBackMessage.Frame:
                     {
                         //Frame is too fast to prevent UI lock
                         if (_tickFrameUpdate < Environment.TickCount)
                         {
-                            var imgInfo = (SdoaqImageInfo)item.objs[0];
+                            var imgInfo = e.ImgInfoList[0];
 
                             WSIO.UTIL.WSUT_IV_AttachRawImgData((IntPtr)pb_CamImage.Tag, (uint)imgInfo.Width, (uint)imgInfo.Height,
-                                (uint)imgInfo.Line,
-                                (uint)imgInfo.PixelBytes,
+                                (uint)imgInfo.Lines,
+                                (uint)imgInfo.ColorByte,
                                 imgInfo.Data, (uint)imgInfo.Data.Length);
 
                             this.BeginInvoke(new MethodInvoker(() =>
                             {
-                                var frameCount = _myCamObj.RecivedFrameCount;
+                                var frameCount = (_camObj as ICamera).RecivedFrameCount;
                                 lbl_ImageStatus.Text = $"Received Frame = { frameCount}  (Displayed Frame = { frameCount - _skipFrame})";
                             }));
 
@@ -126,96 +128,88 @@ namespace SdoaqMultiCameraFrameCallback
 
         private void btn_FOV_Set_Click(object sender, EventArgs e)
         {
-            var camObj = _myCamObj;
+            var cam = _camObj as ICamera;
 
-            camObj.SetGrabState(SDOAQ.SDOAQ_API.eCameraGrabbingStatus.cgsOffGrabbing);
+            cam.SetGrabState(SDOAQ.SDOAQ_API.eCameraGrabbingStatus.cgsOffGrabbing);
 
             var width = int.Parse(txt_FOV_Width.Text);
             var height = int.Parse(txt_FOV_Height.Text);
             var offset_x = int.Parse(txt_FOV_Offset_X.Text);
             var offset_y = int.Parse(txt_FOV_Offset_Y.Text);
 
-            camObj.AppendLog(Logger.emLogLevel.User, $"SetFOV, width = {width}, height = {height}, offset x = {offset_x}, offset y = {offset_y}");
-
-            var rv = camObj.SetFOV(width, height, offset_x, offset_y);
-            if (rv != SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
+            _camObj.AppendLog(Logger.emLogLevel.User, $"SetFOV, width = {width}, height = {height}, offset x = {offset_x}, offset y = {offset_y}");
+            
+            if (cam.SetFOV(width, height, offset_x, offset_y) == false)
             {
-                camObj.AppendLog(Logger.emLogLevel.Warning, $"SetFOV, Fail ({rv})");
+                _camObj.AppendLog(Logger.emLogLevel.Warning, $"SetFOV, Fail");
+                return;
+            }
+            
+            if (cam.GetFOV(out width, out height, out offset_x, out offset_y, out int binnging) == false)
+            {
+                _camObj.AppendLog(Logger.emLogLevel.Warning, $"GetFOV, Fail");
                 return;
             }
 
-            rv = camObj.GetFOV(out width, out height, out offset_x, out offset_y, out int binnging);
-
-            if (rv != SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
-            {
-                MyCamera.WriteLog(Logger.emLogLevel.Warning, $"GetFOV, Fail ({rv})");
-                return;
-            }
-
-            camObj.AppendLog(Logger.emLogLevel.User, $"GetFOV, width = {width}, height = {height}, offset x = {offset_x}, offset y = {offset_y}");
+            _camObj.AppendLog(Logger.emLogLevel.User, $"GetFOV, width = {width}, height = {height}, offset x = {offset_x}, offset y = {offset_y}");
 
             txt_FOV_Width.Text = width.ToString();
             txt_FOV_Height.Text = height.ToString();
             txt_FOV_Offset_X.Text = offset_x.ToString();
             txt_FOV_Offset_Y.Text = offset_y.ToString();
 
-            camObj.SetGrabState(SDOAQ.SDOAQ_API.eCameraGrabbingStatus.cgsOnGrabbing);
+            cam.SetGrabState(SDOAQ.SDOAQ_API.eCameraGrabbingStatus.cgsOnGrabbing);
         }
 
         private void btn_ExposureTime_Set_Click(object sender, EventArgs e)
         {
-            var camObj = _myCamObj;
+            var cam = _camObj as ICamera;
 
             var exposureTime = int.Parse(txt_ExposureTime.Text);
 
-            camObj.AppendLog(Logger.emLogLevel.User, $"Set ExposureTime : {exposureTime}");
-
-            var rv = camObj.SetExposureTime(exposureTime);
-
-            if (rv != SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
+            _camObj.AppendLog(Logger.emLogLevel.User, $"Set ExposureTime : {exposureTime}");
+            
+            if (cam.SetExposureTime(exposureTime) == false)
             {
-                camObj.AppendLog(Logger.emLogLevel.Warning, $"SetExposureTime, Fail ({rv})");
+                _camObj.AppendLog(Logger.emLogLevel.Warning, $"SetExposureTime, Fail");
+                return;
+            }
+            
+            if (cam.GetExposureTime(out exposureTime) == false)
+            {
+                _camObj.AppendLog(Logger.emLogLevel.Warning, $"GetExposureTime, Fail");
                 return;
             }
 
-            rv = camObj.GetExposureTime(out exposureTime);
-
-            if (rv != SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
-            {
-                camObj.AppendLog(Logger.emLogLevel.Warning, $"GetExposureTime, Fail ({rv})");
-                return;
-            }
-
-            camObj.AppendLog(Logger.emLogLevel.User, $"Get ExposureTime : {exposureTime}");
+            _camObj.AppendLog(Logger.emLogLevel.User, $"Get ExposureTime : {exposureTime}");
 
             txt_ExposureTime.Text = exposureTime.ToString();
         }
 
         private void btn_Gain_Set_Click(object sender, EventArgs e)
         {
-            var camObj = _myCamObj;
+            var cam = _camObj as ICamera;
 
             var gain = double.Parse(txt_Gain.Text);
 
-            camObj.AppendLog(Logger.emLogLevel.User, $"Set Gain : {gain}");
+            _camObj.AppendLog(Logger.emLogLevel.User, $"Set Gain : {gain}");
 
-            var rv = camObj.SetGain(gain);
+            var rv = cam.SetGain(gain);
 
-            if (rv != SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
+            if (cam.SetGain(gain) == false)
             {
-                camObj.AppendLog(Logger.emLogLevel.Warning, $"SetGain, Fail ({rv})");
+                _camObj.AppendLog(Logger.emLogLevel.Warning, $"SetGain, Fail ({rv})");
                 return;
             }
 
-            rv = camObj.GetGain(out gain);
-
-            if (rv != SDOAQ.SDOAQ_API.eErrorCode.ecNoError)
+            
+            if (cam.GetGain(out gain) == false)
             {
-                camObj.AppendLog(Logger.emLogLevel.Warning, $"GetGain, Fail ({rv})");
+                _camObj.AppendLog(Logger.emLogLevel.Warning, $"GetGain, Fail ({rv})");
                 return;
             }
 
-            camObj.AppendLog(Logger.emLogLevel.User, $"Get Gain : {gain}");
+            _camObj.AppendLog(Logger.emLogLevel.User, $"Get Gain : {gain}");
 
             txt_Gain.Text = gain.ToString();
         }
@@ -229,10 +223,11 @@ namespace SdoaqMultiCameraFrameCallback
 
         private void btn_SwTrigger_Click(object sender, EventArgs e)
         {
-            var camObj = _myCamObj;
+            var cam = _camObj as ICamera;
+            
+            cam.SetExeSoftwareTrigger();
 
-            camObj.AppendLog(Logger.emLogLevel.User, $"Set Exe Software Trigger");
-            camObj.SetExeSoftwareTrigger();
+            _camObj.AppendLog(Logger.emLogLevel.User, $"Set Exe Software Trigger");
         }
     }
 }

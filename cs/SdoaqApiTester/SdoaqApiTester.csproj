@@ -82,96 +82,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="..\..\Include\SDOAQ\SDOAQ_WS.cs">
-      <Link>SDOAQ\SDOAQ_WS.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQ\SDOAQ_MULTIWS.cs">
-      <Link>SDOAQ\SDOAQ_MULTIWS.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\Logger.cs">
-      <Link>SDOAQCSharp\Tool\Logger.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\MyManualResetEvent.cs">
-      <Link>SDOAQCSharp\Tool\MyManualResetEvent.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\MyQueue.cs">
-      <Link>SDOAQCSharp\Tool\MyQueue.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\SdoaqImageInfo.cs">
-      <Link>SDOAQCSharp\MySdoaq\SdoaqImageInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\WSIO\WSIO.cs">
-      <Link>WSIO\WSIO.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\WSIO\WSIO_GL.cs">
-      <Link>WSIO\WSIO_GL.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\WSIO\WSIO_UTIL.cs">
-      <Link>WSIO\WSIO_UTIL.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\FocusLHU.cs">
-      <Link>SDOAQCSharp\Tool\FocusLHU.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\RingBuffer.cs">
-      <Link>SDOAQCSharp\Tool\RingBuffer.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\WinFormControlExtention.cs">
-      <Link>SDOAQCSharp\Tool\WinFormControlExtention.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Tool\MathExtention.cs">
-      <Link>SDOAQCSharp\Tool\MathExtention.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\SdoaqCamInfo.cs">
-      <Link>SDOAQCSharp\MySdoaq\SdoaqCamInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\SdoaqPointCloudInfo.cs">
-      <Link>SDOAQCSharp\MySdoaq\SdoaqPointCloudInfo.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\SdoaqEventArgs.cs">
-      <Link>SDOAQCSharp\MySdoaq\SdoaqEventArgs.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\MySdoaq.cs">
-      <Link>SDOAQCSharp\MySdoaq\MySdoaq.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\MySdoaq_Static.cs">
-      <Link>SDOAQCSharp\MySdoaq\MySdoaq_Static.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\MySdoaq_Acquisition.cs">
-      <Link>SDOAQCSharp\MySdoaq\MySdoaq_Acquisition.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\MySdoaq_Acquisition_Continuous.cs">
-      <Link>SDOAQCSharp\MySdoaq\MySdoaq_Acquisition_Continuous.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\MySdoaq_Params.cs">
-      <Link>SDOAQCSharp\MySdoaq\MySdoaq_Params.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\MySdoaq\SdoaqScriptReader.cs">
-      <Link>SDOAQCSharp\MySdoaq\SdoaqScriptReader.cs</Link>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Component\SdoLabel.cs">
-      <Link>SDOAQCSharp\Component\SdoLabel.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Component\SdoPanel.cs">
-      <Link>SDOAQCSharp\Component\SdoPanel.cs</Link>
-      <SubType>Component</SubType>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Component\SdoaqParams.cs">
-      <Link>SDOAQCSharp\Component\SdoaqParams.cs</Link>
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Component\SdoaqParams.Designer.cs">
-      <Link>SDOAQCSharp\Component\SdoaqParams.Designer.cs</Link>
-      <DependentUpon>SdoaqParams.cs</DependentUpon>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Component\SdoaqImageViewr.cs">
-      <Link>SDOAQCSharp\Component\SdoaqImageViewr.cs</Link>
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="..\..\Include\SDOAQCSharp\Component\SdoaqImageViewr.Designer.cs">
-      <Link>SDOAQCSharp\Component\SdoaqImageViewr.Designer.cs</Link>
-      <DependentUpon>SdoaqImageViewr.cs</DependentUpon>
-    </Compile>
     <Compile Include="SdoaqApiTester.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -193,14 +103,9 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <EmbeddedResource Include="..\..\Include\SDOAQCSharp\Component\SdoaqParams.resx">
-      <Link>SDOAQCSharp\Component\SdoaqParams.resx</Link>
-      <DependentUpon>SdoaqParams.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="..\..\Include\SDOAQCSharp\Component\SdoaqImageViewr.resx">
-      <Link>SDOAQCSharp\Component\SdoaqImageViewr.resx</Link>
-      <DependentUpon>SdoaqImageViewr.cs</DependentUpon>
-    </EmbeddedResource>
+    <None Include="calib_v21_1.0x.csv">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="Properties\app.manifest" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -232,6 +137,12 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>false</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Include\SDOAQNet\SDOAQNet.csproj">
+      <Project>{b023ac0b-f5eb-4817-8882-d33ef5f20119}</Project>
+      <Name>SDOAQNet</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

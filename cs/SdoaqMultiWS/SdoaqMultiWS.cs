@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Text;
-using System.Linq;
 using System.Collections.Generic;
 using System.Windows.Forms;
-
-using SDOAQCSharp.Tool;
 using System.Drawing;
-using SDOAQCSharp;
-using SDOAQCSharp.Component;
 using System.Threading.Tasks;
+
+using SDOAQNet;
+using SDOAQNet.Component;
+using SDOAQNet.Tool;
+using SDOAQ;
+
 
 namespace SdoaqMultiWS
 {
@@ -27,8 +28,8 @@ namespace SdoaqMultiWS
         private StringBuilder _logBuffer = new StringBuilder();
         private object _lockLogBuffer = new object();
 
-        private Dictionary<MySdoaq.emEofImgViewOption, CheckBox> _chkEdofImgViewOptionList;
-        private Dictionary<int, MySdoaq> _sdoaqObjList = null;
+        private Dictionary<SdoaqController.emEofImgViewOption, CheckBox> _chkEdofImgViewOptionList;
+        private Dictionary<int, SdoaqController> _sdoaqObjList = null;
 
         private List<SdoaqImageViewr> _imgViewerList = new List<SdoaqImageViewr>();
         private List<RadioButton> _rdoSelWsList = new List<RadioButton>();
@@ -41,17 +42,16 @@ namespace SdoaqMultiWS
 		{
 			InitializeComponent();
 
-            _chkEdofImgViewOptionList = new Dictionary<MySdoaq.emEofImgViewOption, CheckBox>()
+            _chkEdofImgViewOptionList = new Dictionary<SdoaqController.emEofImgViewOption, CheckBox>()
             {
-                { MySdoaq.emEofImgViewOption.StepMap, chk_StepMap },
-                { MySdoaq.emEofImgViewOption.QuaalityMap, chk_QualityMap },
-                { MySdoaq.emEofImgViewOption.HeightMap, chk_HeightMap },
-                { MySdoaq.emEofImgViewOption.PointClound, chk_PointCloud },
-                { MySdoaq.emEofImgViewOption.Edof, chk_Edof },
+                { SdoaqController.emEofImgViewOption.StepMap, chk_StepMap },
+                { SdoaqController.emEofImgViewOption.QuaalityMap, chk_QualityMap },
+                { SdoaqController.emEofImgViewOption.HeightMap, chk_HeightMap },
+                { SdoaqController.emEofImgViewOption.PointClound, chk_PointCloud },
+                { SdoaqController.emEofImgViewOption.Edof, chk_Edof },
             };
-
-            //_sdoaqObjList = MySdoaq.LoadScript(MySdoaq.emPlayerMethod.Thread); // To implement continuous mode as a single shot thread.
-            _sdoaqObjList = MySdoaq.LoadScript(MySdoaq.emPlayerMethod.CallBackFunc);
+            
+            _sdoaqObjList = SdoaqController.LoadScript();
 
             for (int i = 0; i < _sdoaqObjList.Count; i++)
             {
@@ -87,11 +87,11 @@ namespace SdoaqMultiWS
                 rdoLeft = rdo.Right + rdoGap;
             }
 
-            MySdoaq.LogReceived += Sdoaq_LogDataReceived;
-            MySdoaq.Initialized += Sdoaq_Initialized;            
+            SdoaqController.LogReceived += Sdoaq_LogDataReceived;
+            SdoaqController.Initialized += Sdoaq_Initialized;            
         }
         
-        private MySdoaq GetSdoaqObj()
+        private SdoaqController GetSdoaqObj()
         {
             return _sdoaqObjList[Math.Max(0, _currentIdxWs - 1)];
         }
@@ -190,7 +190,7 @@ namespace SdoaqMultiWS
             _currentIdxWs = idxWs;
            
             cmp_SdoaqParams.Set_SdoaqObj(GetSdoaqObj());
-            if (MySdoaq.IsInitialize)
+            if (SdoaqController.IsInitialize)
             {
                 cmp_SdoaqParams.Update_Param();
             }
@@ -246,7 +246,7 @@ namespace SdoaqMultiWS
             EnableGroup(bEnableInit: true, bEnableParam: true, bEnableEdofOption: true, bEnableAcq: true);
             EnableAcqGroup_Idle();
 
-            WriteLog($">> SDOAQ DLL Version = {MySdoaq.GetVersion()}");
+            WriteLog($">> SDOAQ DLL Version = {SdoaqController.GetVersion()}");
             //WriteLog($">> sdedof dll Version = {MySdoaq.GetVersion_SdEdofAlgorithm()}");
 
             _rdoSelWsList[0].Checked = true;
@@ -254,21 +254,21 @@ namespace SdoaqMultiWS
 
 		private void SdoaqMultiWS_FormClosed(object sender, FormClosedEventArgs e)
 		{
-            MySdoaq.LogReceived -= Sdoaq_LogDataReceived;
-            MySdoaq.Initialized -= Sdoaq_Initialized;
+            SdoaqController.LogReceived -= Sdoaq_LogDataReceived;
+            SdoaqController.Initialized -= Sdoaq_Initialized;
 
             foreach (var sdoaqObj in _sdoaqObjList.Values)
             {
                 sdoaqObj.AcquisitionStop();
             }
 
-            MySdoaq.DisposeStaticResouce();
+            SdoaqController.DisposeStaticResouce();
 
             _logBuffer = null;
             
             // Run SDOAQ_Finalize method asynchronously, preventing the main UI thread from being blocked.
             // When the form close button is clicked while image acquisition is in progress in C# application, the SDOAQ finalization is delayed.
-            Task.Run(() => { MySdoaq.SDOAQ_Finalize(); });
+            Task.Run(() => { SdoaqController.SDOAQ_Finalize(); });
         }
 
 		private void SdoaqMultiWS_Resize(object sender, EventArgs e)
@@ -278,12 +278,12 @@ namespace SdoaqMultiWS
 
         private void btn_Init_Click(object sender, EventArgs e)
         {
-            MySdoaq.SDOAQ_Initialize();
+            SdoaqController.SDOAQ_Initialize(false);
         }
 
         private void btn_Final_Click(object sender, EventArgs e)
         {
-            MySdoaq.SDOAQ_Finalize();
+            SdoaqController.SDOAQ_Finalize();
         }
 
         private void btn_AcqMode_Stack_Click(object sender, EventArgs e)
@@ -314,7 +314,7 @@ namespace SdoaqMultiWS
         {
             var btn = sender as Button;
 
-            var edofImageOption = new MySdoaq.EdofImageList()
+            var edofImageOption = new SdoaqController.EdofImageList()
             {
                 EnableEdofImg = chk_Edof.Checked,
                 EnableStepMapImg = chk_StepMap.Checked,
@@ -389,9 +389,9 @@ namespace SdoaqMultiWS
 
                     switch (GetSdoaqObj().PlayerMode)
                     {
-                        case MySdoaq.emPlayerMode.FocusStack: control = btn_StopStack; break;
-                        case MySdoaq.emPlayerMode.Edof: control = btn_StopEdof; break;
-                        case MySdoaq.emPlayerMode.Af: control = btn_StopAF; break;
+                        case SdoaqController.emPlayerMode.FocusStack: control = btn_StopStack; break;
+                        case SdoaqController.emPlayerMode.Edof: control = btn_StopEdof; break;
+                        case SdoaqController.emPlayerMode.Af: control = btn_StopAF; break;
                     }
                     EnableAcqGroup_Continuous(control);
                 }

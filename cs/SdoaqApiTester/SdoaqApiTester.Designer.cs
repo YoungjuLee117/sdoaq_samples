@@ -33,8 +33,8 @@ namespace SdoaqApiTester
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SdoaqApiTester));
             this.rtxb_Log = new System.Windows.Forms.RichTextBox();
             this.tmr_LogUpdate = new System.Windows.Forms.Timer(this.components);
-            this.pnl_Viewer = new SDOAQCSharp.Component.SdoPanel();
-            this.pnl_Control = new SDOAQCSharp.Component.SdoPanel();
+            this.pnl_Viewer = new SDOAQNet.Component.SdoPanel();
+            this.pnl_Control = new SDOAQNet.Component.SdoPanel();
             this.gr_Acquisition = new System.Windows.Forms.GroupBox();
             this.btn_Snap = new System.Windows.Forms.Button();
             this.btn_AcqAF = new System.Windows.Forms.Button();
@@ -52,8 +52,8 @@ namespace SdoaqApiTester
             this.chk_QualityMap = new System.Windows.Forms.CheckBox();
             this.chk_Edof = new System.Windows.Forms.CheckBox();
             this.chk_StepMap = new System.Windows.Forms.CheckBox();
-            this.cmp_SdoaqParams = new SDOAQCSharp.Component.SdoaqParams();
-            this.pnl_Init = new SDOAQCSharp.Component.SdoPanel();
+            this.cmp_SdoaqParams = new SDOAQNet.Component.SdoaqParams();
+            this.pnl_Init = new SDOAQNet.Component.SdoPanel();
             this.btn_Init = new System.Windows.Forms.Button();
             this.btn_Final = new System.Windows.Forms.Button();
             this.pnl_Control.SuspendLayout();
@@ -401,14 +401,14 @@ namespace SdoaqApiTester
 
         #endregion
 
-        private SDOAQCSharp.Component.SdoPanel pnl_Control;
-        private SDOAQCSharp.Component.SdoPanel pnl_Viewer;
+        private SDOAQNet.Component.SdoPanel pnl_Control;
+        private SDOAQNet.Component.SdoPanel pnl_Viewer;
         private System.Windows.Forms.RichTextBox rtxb_Log;
-        private SDOAQCSharp.Component.SdoPanel pnl_Init;
+        private SDOAQNet.Component.SdoPanel pnl_Init;
         private System.Windows.Forms.Button btn_Init;
         private System.Windows.Forms.Button btn_Final;
         private System.Windows.Forms.Timer tmr_LogUpdate;
-        private SDOAQCSharp.Component.SdoaqParams cmp_SdoaqParams;
+        private SDOAQNet.Component.SdoaqParams cmp_SdoaqParams;
         private System.Windows.Forms.GroupBox gr_EdofImgViewOption;
         private System.Windows.Forms.CheckBox chk_PointCloud;
         private System.Windows.Forms.CheckBox chk_HeightMap;

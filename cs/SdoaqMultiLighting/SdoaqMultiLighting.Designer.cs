@@ -42,9 +42,9 @@
             this.tmr_LogUpdate = new System.Windows.Forms.Timer(this.components);
             this.tlp_Main = new System.Windows.Forms.TableLayoutPanel();
             this.pnl_View = new System.Windows.Forms.Panel();
-            this.pnl_Viewer = new SDOAQCSharp.Component.SdoPanel();
+            this.pnl_Viewer = new SDOAQNet.Component.SdoPanel();
             this.pnl_Controls = new System.Windows.Forms.Panel();
-            this.pnl_Init = new SDOAQCSharp.Component.SdoPanel();
+            this.pnl_Init = new SDOAQNet.Component.SdoPanel();
             this.btn_Init = new System.Windows.Forms.Button();
             this.btn_Final = new System.Windows.Forms.Button();
             this.gr_Acq = new System.Windows.Forms.GroupBox();
@@ -318,7 +318,7 @@
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Timer tmr_LogUpdate;
-        private SDOAQCSharp.Component.SdoPanel pnl_Viewer;
+        private SDOAQNet.Component.SdoPanel pnl_Viewer;
         private System.Windows.Forms.TableLayoutPanel tlp_Main;
         private System.Windows.Forms.Panel pnl_View;
         private System.Windows.Forms.Panel pnl_Controls;
@@ -327,7 +327,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Button btn_Acq;
         private System.Windows.Forms.ComboBox cmb_Param_SelectLighting;
-        private SDOAQCSharp.Component.SdoPanel pnl_Init;
+        private SDOAQNet.Component.SdoPanel pnl_Init;
         private System.Windows.Forms.Button btn_Init;
         private System.Windows.Forms.Button btn_Final;
     }

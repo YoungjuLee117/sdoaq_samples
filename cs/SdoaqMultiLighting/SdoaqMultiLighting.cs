@@ -2,12 +2,13 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
-
-using SDOAQ;
-using SDOAQCSharp.Tool;
-using SDOAQCSharp;
-using SDOAQCSharp.Component;
 using System.Threading.Tasks;
+
+using SDOAQNet;
+using SDOAQNet.Component;
+using SDOAQNet.Tool;
+using SDOAQ;
+
 
 namespace SdoaqMultiLighting
 {
@@ -15,7 +16,7 @@ namespace SdoaqMultiLighting
     {
         private StringBuilder _logBuffer = new StringBuilder();
         private object _lockLog = new object();
-        private Dictionary<int, MySdoaq> _sdoaqObjList = null;
+        private Dictionary<int, SdoaqController> _sdoaqObjList = null;
 
         private SdoaqImageViewr _imgViewer;
         private const int STACK_IMAGE_FOCUS = 160;
@@ -24,19 +25,20 @@ namespace SdoaqMultiLighting
             InitializeComponent();
 
             _imgViewer = new SdoaqImageViewr(false);
+            _imgViewer.VisiBleImageListBox = false;
             _imgViewer.Dock = DockStyle.Fill;
 
             pnl_Viewer.Controls.Add(_imgViewer);
-            _sdoaqObjList = MySdoaq.LoadScript();
+            _sdoaqObjList = SdoaqController.LoadScript();
             _imgViewer.Set_SdoaqObj(GetSdoaqObj());
 
-            MySdoaq.LogReceived += Sdoaq_LogDataReceived;
-            MySdoaq.Initialized += Sdoaq_Initialized;
+            SdoaqController.LogReceived += Sdoaq_LogDataReceived;
+            SdoaqController.Initialized += Sdoaq_Initialized;
 
             tmr_LogUpdate.Start();
         }
 
-        private MySdoaq GetSdoaqObj()
+        private SdoaqController GetSdoaqObj()
         {
             return _sdoaqObjList[0];
         }
@@ -126,13 +128,13 @@ namespace SdoaqMultiLighting
 
         private void SdoaqAutoFocus_FormClosed(object sender, FormClosedEventArgs e)
         {
-            MySdoaq.LogReceived -= Sdoaq_LogDataReceived;
+            SdoaqController.LogReceived -= Sdoaq_LogDataReceived;
 
             GetSdoaqObj()?.AcquisitionStop();
 
-            MySdoaq.DisposeStaticResouce();
+            SdoaqController.DisposeStaticResouce();
             
-            Task.Run(() => { MySdoaq.SDOAQ_Finalize(); });
+            Task.Run(() => { SdoaqController.SDOAQ_Finalize(); });
         }
         
         private void btn_Param_SetData_Click(object sender, EventArgs e)
@@ -154,15 +156,15 @@ namespace SdoaqMultiLighting
         private void btn_Init_Click(object sender, EventArgs e)
         {
             EnableControl(false);
-            MySdoaq.WriteLog(Logger.emLogLevel.User, $"Initialize Click");
-            MySdoaq.SDOAQ_Initialize();
+            SdoaqController.WriteLog(Logger.emLogLevel.User, $"Initialize Click");
+            SdoaqController.SDOAQ_Initialize(false);
         }
 
         private void btn_Final_Click(object sender, EventArgs e)
         {
             EnableControl(false);
-            MySdoaq.WriteLog(Logger.emLogLevel.User, $"Finalize Click");
-            MySdoaq.SDOAQ_Finalize();
+            SdoaqController.WriteLog(Logger.emLogLevel.User, $"Finalize Click");
+            SdoaqController.SDOAQ_Finalize();
         }
 
         private void cmb_Param_SelectLighting_SelectedIndexChanged(object sender, EventArgs e)

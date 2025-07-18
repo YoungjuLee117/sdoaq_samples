@@ -4,12 +4,11 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
+using SDOAQNet;
+using SDOAQNet.Component;
+using SDOAQNet.Tool;
 using SDOAQ;
 using SDOAQ_EDOF;
-using SDOAQCSharp.Tool;
-using SDOAQCSharp;
-using SDOAQCSharp.Component;
-using System.Diagnostics;
 
 namespace SdoaqEdof
 {
@@ -17,7 +16,7 @@ namespace SdoaqEdof
 	{
 		private StringBuilder _logBuffer = new StringBuilder();
 		private object _lockLog = new object();
-		private Dictionary<int, MySdoaq> _sdoaqObjList = null;
+		private Dictionary<int, SdoaqController> _sdoaqObjList = null;
 
 		private SdoaqImageViewr _imgViewer;
 
@@ -27,13 +26,14 @@ namespace SdoaqEdof
 			cmb_EdofResizeRatio.SelectedItem = "0.5";
 
 			_imgViewer = new SdoaqImageViewr(false);
+            _imgViewer.VisiBleImageListBox = false;
 			_imgViewer.Dock = DockStyle.Fill;
 
 			pnl_Viewer.Controls.Add(_imgViewer);
-			_sdoaqObjList = MySdoaq.LoadScript();
+			_sdoaqObjList = SdoaqController.LoadScript();
 			_imgViewer.Set_SdoaqObj(GetSdoaqObj());
 
-			MySdoaq.LogReceived += Sdoaq_LogDataReceived;
+            SdoaqController.LogReceived += Sdoaq_LogDataReceived;
 		}
 
 		private void SdoaqEDoF_Load(object sender, EventArgs e)
@@ -45,15 +45,15 @@ namespace SdoaqEdof
 
 		private void SdoaqEDoF_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			MySdoaq.LogReceived -= Sdoaq_LogDataReceived;
+            SdoaqController.LogReceived -= Sdoaq_LogDataReceived;
 
 			GetSdoaqObj()?.AcquisitionStop();
 
 			SDOAQ_EDOF_API.SDOAQ_EDOF_Finalize();
 
-			MySdoaq.DisposeStaticResouce();
+            SdoaqController.DisposeStaticResouce();
 
-			Task.Run(() => { MySdoaq.SDOAQ_Finalize(); });
+			Task.Run(() => { SdoaqController.SDOAQ_Finalize(); });
 		}
 
 		private void Frm_Load()
@@ -63,13 +63,13 @@ namespace SdoaqEdof
 			// If you capture images directly without using SDOAQ library, you do not need to perform library initialization.
 			//
 			//================================================================================================================
-			MySdoaq.SDOAQ_Initialize();
+            SdoaqController.SDOAQ_Initialize(false);
 
 			var version = SDOAQ_EDOF_API.SDOAQ_EDOF_GetVersion();
 			Write_Log($"SD EDoF Algorithm version = {version}");
 		}
 
-		private MySdoaq GetSdoaqObj()
+		private SdoaqController GetSdoaqObj()
 		{
 			return _sdoaqObjList[0];
 		}
@@ -122,7 +122,7 @@ namespace SdoaqEdof
 		private void btn_RunEDoF_Click(object sender, EventArgs e)
 		{
 			var focusList = GetSdoaqObj().FocusList.GetStepList();
-			var acqParam = GetSdoaqObj().CamInfo.AcqParam;
+			ref var acqParam = ref GetSdoaqObj().CamInfo.GetAcqParamRef();
 			var camInfo = GetSdoaqObj().CamInfo;
 			var focusImagePointerList = new IntPtr[focusList.Length];
 
@@ -190,64 +190,35 @@ namespace SdoaqEdof
 			//inParams.roi_height = inParams.image_height;
 
 			double.TryParse(cmb_EdofResizeRatio.SelectedItem.ToString(), out double resize_ratio);
-			inParams.resize_ratio = resize_ratio;
-
 			Int32.TryParse(txt_KernelSize.Text, out int pixelwise_kernel_size);
-			inParams.pixelwise_kernel_size = pixelwise_kernel_size;
-
 			Int32.TryParse(txt_Iteration.Text, out int pixelwise_iteration);
-			inParams.pixelwise_iteration = pixelwise_iteration;
-
-			inParams.depthwise_kernel_size = -1;
 
 			Double.TryParse(txt_Threshold.Text, out double depth_quality_th);
-			inParams.depth_quality_th = depth_quality_th;
-
-			inParams.bilateral_sigma_color = 6;
-			inParams.bilateral_sigma_space = 5;
-			inParams.num_thread = -1;
-			inParams.is_scale_correction_enabled = true;
 
 			Int32.TryParse(txt_ScaleStep.Text, out int dst_step);
-			inParams.scale_correction_dst_step = dst_step;
-
-			SDOAQ_EDOF_API.SDOAQ_EDOF_ImageParams edofParams = new SDOAQ_EDOF_API.SDOAQ_EDOF_ImageParams();
-			edofParams.is_allocated = true;
-			edofParams.image_width = inParams.image_width;
-			edofParams.image_height = inParams.image_height;
-			edofParams.image_offset_x = inParams.image_offset_x;
-			edofParams.image_offset_y = inParams.image_offset_y;
-			edofParams.binning_x = inParams.binning_x;
-			edofParams.binning_y = inParams.binning_y;
-			edofParams.num_channel = inParams.num_channel;
-			edofParams.byte_per_channel = inParams.byte_per_channel;
-			edofParams.num_padding_bit = inParams.num_padding_bit;
-			edofParams.is_floating_point = false;
-			edofParams.is_scale_correction_enabled = inParams.is_scale_correction_enabled;
-			edofParams.scale_correction_dst_step = inParams.scale_correction_dst_step;
 
 			Stopwatch edofRun = new Stopwatch();
 			edofRun.Start();
-			var bufferEdofImage = new byte[camInfo.ImgSize];
-			var rv_edof = SDOAQ_EDOF_API.SDOAQ_EDOF_Run(ref inParams, focusImagePointerList, focusList, ref edofParams, bufferEdofImage);
+
+			int rv = GetSdoaqObj().RunEdof(focusImagePointerList, focusList, 
+                camInfo.ImgSize , camInfo.ColorByte, 
+                ref acqParam, 
+                resize_ratio,
+                pixelwise_kernel_size,
+                pixelwise_iteration, 
+                depth_quality_th, 
+                dst_step);
 			edofRun.Stop();
 			Write_Log($"SDOAQ_EDOF_Run() takes {edofRun.Elapsed.TotalMilliseconds.ToString()} ms.");
 
-			var imgInfoList = new List<SdoaqImageInfo>();
-			if (rv_edof >= 0)
-			{
-				//Write_Log($"SDOAQ_EDOF_Run() completed.");				
-
-				imgInfoList.Add(new SdoaqImageInfo("Edof",
-					acqParam.cameraRoiWidth, acqParam.cameraRoiHeight, camInfo.ColorByte,
-					bufferEdofImage));
-
-				GetSdoaqObj().CallBackMsgLoop.Invoke((MySdoaq.emCallBackMessage.Edof, new object[] { imgInfoList }));
-			}
-			else
-			{
-				Write_Log($"Check SDOAQ_EDOF_Run Error Code[{rv_edof}]");
-			}
+            if (rv > 0)
+            {
+                //Write_Log("SDOAQ_EDOF_Run() completed.");
+            }
+            else
+            {
+                Write_Log($"Check SDOAQ_EDOF_Run Error Code[{rv}]");
+            }
 		}
 
 		private void btn_SetROI_Click(object sender, EventArgs e)

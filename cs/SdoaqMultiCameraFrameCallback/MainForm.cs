@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing;
 
 using SDOWSIO;
-using SDOAQCSharp.Tool;
-using SDOAQCSharp;
-using System.Threading.Tasks;
-using System.Drawing;
+using SDOAQNet;
+using SDOAQNet.Component;
+using SDOAQNet.Tool;
+using SDOAQ;
+
 
 namespace SdoaqMultiCameraFrameCallback
 {
     public partial class MainForm : Form
     {
-        private Dictionary<int, MyCamera> _sdoaqCamList = null;
+        private Dictionary<int, SdoaqController> _sdoaqCamList = null;
         private Dictionary<int, CamViewer> _camViewerList;
 
         private StringBuilder _logBuffer = new StringBuilder();
@@ -26,12 +28,12 @@ namespace SdoaqMultiCameraFrameCallback
         {
             InitializeComponent();
             
-            _sdoaqCamList = MyCamera.LoadScript();
+            _sdoaqCamList = SdoaqController.LoadScript();
             _camViewerList = new Dictionary<int, CamViewer>();
 
             foreach (var item in _sdoaqCamList)
             {
-                int idxCam = item.Value.CamIndex + 1;
+                int idxCam = (int)item.Value.CamIndex + 1;
                 var camViewer = new CamViewer();
                 camViewer.Name = $"CamViewr_Cam{idxCam}";
 
@@ -49,30 +51,12 @@ namespace SdoaqMultiCameraFrameCallback
                 _camViewerList.Add(item.Key, camViewer);
             }
 
-            MyCamera.LogReceived += Logger_DataReceived;
-            MyCamera.Initialized += MyCamera_Initialized;
+            SdoaqController.LogReceived += Logger_DataReceived;
+            SdoaqController.Initialized += MyCamera_Initialized;
             
             tmr_LogUpdate.Start();
         }
         
-        private void CreateViewPanel(Control ctrl, string viewrName)
-        {
-            WSIO.UTIL.WSUT_IV_CreateImageViewer(viewrName
-                    , ctrl.Handle, out var hwnd, 0
-                    , WSIO.UTIL.WSUTIVOPMODE.WSUTIVOPMODE_VISION
-                    | WSIO.UTIL.WSUTIVOPMODE.WSUTIVOPMODE_INFOOSD);
-
-            WSIO.UTIL.WSUT_IV_SetColor(hwnd, WSIO.UTIL.WSUTIVRESOURCE.WSUTIVRESOURCE_OUTERFRAME, Utils.RGB(70, 130, 180));
-
-            ctrl.Tag = hwnd;
-        }
-
-        private MyCamera GetCamObj()
-        {
-            return _sdoaqCamList[0];
-        }
-        
-
         private void Logger_DataReceived(object sender, LoggerEventArgs e)
         {
             lock (_lockLog)
@@ -83,7 +67,7 @@ namespace SdoaqMultiCameraFrameCallback
 
         private void MyCamera_Initialized(object sender, SdoaqEventArgs e)
         {
-            MyCamera.EanbleCameraFrameCallBack(true);
+            SdoaqController.EanbleCameraFrameCallBack(true);
 
             foreach (var item in _camViewerList)
             {
@@ -93,29 +77,29 @@ namespace SdoaqMultiCameraFrameCallback
         
         private void MainForm_Load(object sender, EventArgs e)
         {
-            MyCamera.WriteLog(Logger.emLogLevel.Info, $"SDOAQ Version : {MyCamera.GetVersion()}");
+            SdoaqController.WriteLog(Logger.emLogLevel.Info, $"SDOAQ Version : {SdoaqController.GetVersion()}");
 
-            MyCamera.WriteLog(Logger.emLogLevel.User, $"Initialize Start");
+            SdoaqController.WriteLog(Logger.emLogLevel.User, $"Initialize Start");
 
-            MyCamera.SDOAQ_Initialize(false);
+            SdoaqController.SDOAQ_Initialize(false, true);
         }
 
         private void MainForm_FormClosed(object sender, FormClosedEventArgs e)
         {
-            MyCamera.LogReceived -= Logger_DataReceived;
-            MyCamera.Initialized -= MyCamera_Initialized;
+            SdoaqController.LogReceived -= Logger_DataReceived;
+            SdoaqController.Initialized -= MyCamera_Initialized;
 
-            MyCamera.EanbleCameraFrameCallBack(false);
+            SdoaqController.EanbleCameraFrameCallBack(false);
 
-            foreach (var cam in _sdoaqCamList.Values)
+            foreach (ICamera cam in _sdoaqCamList.Values)
             {
                 cam.SetTriggerMode(SDOAQ.SDOAQ_API.eCameraTriggerMode.ctmSoftware);
                 cam.SetGrabState(SDOAQ.SDOAQ_API.eCameraGrabbingStatus.cgsOffGrabbing);
             }
 
-            MyCamera.DisposeStaticResouce();
+            SdoaqController.DisposeStaticResouce();
 
-            MyCamera.SDOAQ_Finalize();
+            SdoaqController.SDOAQ_Finalize();
         }
         
         private void splitContainer_SplitterMoved(object sender, SplitterEventArgs e)

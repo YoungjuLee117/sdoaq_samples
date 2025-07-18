@@ -60,7 +60,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.btn_OpenCalibration = new System.Windows.Forms.Button();
-			this.pnl_Viewer = new SDOAQCSharp.Component.SdoPanel();
+			this.pnl_Viewer = new SDOAQNet.Component.SdoPanel();
 			this.tmr_LogUpdate = new System.Windows.Forms.Timer(this.components);
 			this.openFile = new System.Windows.Forms.OpenFileDialog();
 			this.tlp_Main.SuspendLayout();
@@ -459,7 +459,7 @@
         private System.Windows.Forms.Button btn_PlayEDoF;
         private System.Windows.Forms.Button btn_SingleShotEDoF;
         private System.Windows.Forms.RichTextBox txt_Log;
-        private SDOAQCSharp.Component.SdoPanel pnl_Viewer;
+        private SDOAQNet.Component.SdoPanel pnl_Viewer;
         private System.Windows.Forms.Timer tmr_LogUpdate;
         private System.Windows.Forms.ComboBox cmb_EdofResizeRatio;
         private System.Windows.Forms.OpenFileDialog openFile;

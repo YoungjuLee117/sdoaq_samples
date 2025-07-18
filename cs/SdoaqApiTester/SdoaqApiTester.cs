@@ -2,11 +2,11 @@
 using System.Text;
 using System.Collections.Generic;
 using System.Windows.Forms;
-
-using SDOAQCSharp.Tool;
 using System.Drawing;
-using SDOAQCSharp;
-using SDOAQCSharp.Component;
+
+using SDOAQNet;
+using SDOAQNet.Component;
+using SDOAQNet.Tool;
 
 namespace SdoaqApiTester
 {
@@ -25,8 +25,8 @@ namespace SdoaqApiTester
 		private StringBuilder _logBuffer = new StringBuilder();
 		private object _lockLogBuffer = new object();
 
-		private Dictionary<MySdoaq.emEofImgViewOption, CheckBox> _chkEdofImgViewOptionList;
-		private Dictionary<int, MySdoaq> _sdoaqObjList = null;
+		private Dictionary<SdoaqController.emEofImgViewOption, CheckBox> _chkEdofImgViewOptionList;
+		private Dictionary<int, SdoaqController> _sdoaqObjList = null;
 
 		private SdoaqImageViewr _imgViewer;
 		//----------------------------------------------------------------------------
@@ -39,26 +39,26 @@ namespace SdoaqApiTester
 
 			pnl_Viewer.Controls.Add(_imgViewer);
 
-			_chkEdofImgViewOptionList = new Dictionary<MySdoaq.emEofImgViewOption, CheckBox>()
+			_chkEdofImgViewOptionList = new Dictionary<SdoaqController.emEofImgViewOption, CheckBox>()
 			{
-				{ MySdoaq.emEofImgViewOption.StepMap, chk_StepMap },
-				{ MySdoaq.emEofImgViewOption.QuaalityMap, chk_QualityMap },
-				{ MySdoaq.emEofImgViewOption.HeightMap, chk_HeightMap },
-				{ MySdoaq.emEofImgViewOption.PointClound, chk_PointCloud },
-				{ MySdoaq.emEofImgViewOption.Edof, chk_Edof },
+				{ SdoaqController.emEofImgViewOption.StepMap, chk_StepMap },
+				{ SdoaqController.emEofImgViewOption.QuaalityMap, chk_QualityMap },
+				{ SdoaqController.emEofImgViewOption.HeightMap, chk_HeightMap },
+				{ SdoaqController.emEofImgViewOption.PointClound, chk_PointCloud },
+				{ SdoaqController.emEofImgViewOption.Edof, chk_Edof },
 			};
 
 			//_sdoaqObjList = MySdoaq.LoadScript(MySdoaq.emPlayerMethod.Thread); // To implement continuous mode as a single shot thread.
-			_sdoaqObjList = MySdoaq.LoadScript(MySdoaq.emPlayerMethod.CallBackFunc);
+			_sdoaqObjList = SdoaqController.LoadScript();
 
 			_imgViewer.Set_SdoaqObj(GetSdoaqObj());
 			cmp_SdoaqParams.Set_SdoaqObj(GetSdoaqObj());
 
-			MySdoaq.LogReceived += Sdoaq_LogDataReceived;
-			MySdoaq.Initialized += Sdoaq_Initialized;
+            SdoaqController.LogReceived += Sdoaq_LogDataReceived;
+            SdoaqController.Initialized += Sdoaq_Initialized;
 		}
 
-		private MySdoaq GetSdoaqObj()
+		private SdoaqController GetSdoaqObj()
 		{
 			return _sdoaqObjList[0];
 		}
@@ -186,16 +186,16 @@ namespace SdoaqApiTester
 			EnableGroup(bEnableInit: true, bEnableParam: true, bEnableEdofOption: true, bEnableAcq: true);
 			EnableAcqGroup_Idle();
 
-			WriteLog($">> SDOAQ DLL Version = {MySdoaq.GetVersion()}");
-			//WriteLog($">> sdedof dll Version = {MySdoaq.GetVersion_SdEdofAlgorithm()}");
-		}
+			WriteLog($">> SDOAQ DLL Version = {SdoaqController.GetVersion()}");
+            WriteLog($">> sdedof dll Version = {SdoaqController.GetVersion_SdEdofAlgorithm()}");
+        }
 
-		private void SdoaqApiTester_FormClosed(object sender, FormClosedEventArgs e)
+        private void SdoaqApiTester_FormClosed(object sender, FormClosedEventArgs e)
 		{
-			MySdoaq.SDOAQ_Finalize();
+            SdoaqController.SDOAQ_Finalize();
 
-			MySdoaq.LogReceived -= Sdoaq_LogDataReceived;
-			MySdoaq.Initialized -= Sdoaq_Initialized;
+			SdoaqController.LogReceived -= Sdoaq_LogDataReceived;
+            SdoaqController.Initialized -= Sdoaq_Initialized;
 
 			_logBuffer = null;
 
@@ -203,7 +203,7 @@ namespace SdoaqApiTester
 			{
 				sdoaqObj.Dispose();
 			}
-            MySdoaq.DisposeStaticResouce();
+            SdoaqController.DisposeStaticResouce();
         }
 
 		private void SdoaqApiTester_Resize(object sender, EventArgs e)
@@ -213,14 +213,14 @@ namespace SdoaqApiTester
 
 		private void btn_Init_Click(object sender, EventArgs e)
 		{
-			MySdoaq.SDOAQ_Initialize();
-
+            SdoaqController.SDOAQ_Initialize(false);
+			
 			MySdoaq.SDOAQ_RegisterMoveOk();
 		}
 
 		private void btn_Final_Click(object sender, EventArgs e)
 		{
-			MySdoaq.SDOAQ_Finalize();
+            SdoaqController.SDOAQ_Finalize();
 		}
 
 		private void btn_AcqMode_Stack_Click(object sender, EventArgs e)
@@ -251,7 +251,7 @@ namespace SdoaqApiTester
 		{
 			var btn = sender as Button;
 
-			var edofImageOption = new MySdoaq.EdofImageList()
+			var edofImageOption = new SdoaqController.EdofImageList()
 			{
 				EnableEdofImg = chk_Edof.Checked,
 				EnableStepMapImg = chk_StepMap.Checked,
