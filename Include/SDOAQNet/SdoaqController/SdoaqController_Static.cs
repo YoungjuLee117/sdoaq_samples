@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
-using System.Threading.Tasks;
 using SDOAQ;
 using SDOAQNet.Tool;
 
@@ -229,27 +226,9 @@ namespace SDOAQNet
             float inc = 256f / range;
 
             var buffer = new byte[totalPixelSize];
-
-            int simdSize = Vector<float>.Count;
-            int i = 0;
-
-            var vMin = new Vector<float>(low);
-            var vScale = new Vector<float>(inc);
-
-            for (; i <= totalPixelSize - simdSize; i += simdSize)
+            for (uint i = 0; i < totalPixelSize; i++)
             {
-                var input = new Vector<float>(data, i);
-                var normalized = (input - vMin) * vScale;
-
-                for (int j = 0; j < simdSize; j++)
-                {
-                    buffer[i + j] = (byte)Math.Min(255, Math.Max(0, (int)normalized[j]));
-                }
-            }
-
-            for (; i < totalPixelSize; i++)
-            {
-                buffer[i] = (byte)Math.Min(255, Math.Max(0, (int)((data[i] - low) * inc)));
+                buffer[i] = (byte)((data[i] - low) * inc);
             }
 
             return buffer;
