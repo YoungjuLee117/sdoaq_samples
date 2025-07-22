@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,13 +11,13 @@ using SDOAQ;
 
 namespace SdoaqEdof
 {
-    public partial class SdoaqEDoF : Form
+	public partial class SdoaqEDoF : Form
     {
         private StringBuilder _logBuffer = new StringBuilder();
         private object _lockLog = new object();
         private Dictionary<int, SdoaqController> _sdoaqObjList = null;
 
-		private SdoaqImageViewr _imgViewer;
+        private SdoaqImageViewr _imgViewer;
 
         public SdoaqEDoF()
         {
@@ -39,18 +35,18 @@ namespace SdoaqEdof
             SdoaqController.LogReceived += Sdoaq_LogDataReceived;
         }
 
-		private void SdoaqEDoF_Load(object sender, EventArgs e)
-		{
-			OpenFileDialogSet();
-			tmr_LogUpdate.Start();
-			Frm_Load();
-		}
+        private void SdoaqEDoF_Load(object sender, EventArgs e)
+        {
+            OpenFileDialogSet();
+            tmr_LogUpdate.Start();
+            Frm_Load();
+        }
 
         private void SdoaqEDoF_FormClosed(object sender, FormClosedEventArgs e)
         {
             SdoaqController.LogReceived -= Sdoaq_LogDataReceived;
 
-			GetSdoaqObj()?.AcquisitionStop();
+            GetSdoaqObj()?.AcquisitionStop();
 
             SdoaqController.DisposeStaticResouce();
 
@@ -74,27 +70,27 @@ namespace SdoaqEdof
                 return;
             }
 
-			lock (_lockLog)
-			{
-				txt_Log.AppendText(_logBuffer.ToString());
-				txt_Log.ScrollToCaret();
-				_logBuffer.Clear();
-			}
-		}
+            lock (_lockLog)
+            {
+                txt_Log.AppendText(_logBuffer.ToString());
+                txt_Log.ScrollToCaret();
+                _logBuffer.Clear();
+            }
+        }
 
-		private void Sdoaq_LogDataReceived(object sender, LoggerEventArgs e)
-		{
-			lock (_lockLog)
-			{
-				_logBuffer.Append(e.Data);
-			}
-		}
+        private void Sdoaq_LogDataReceived(object sender, LoggerEventArgs e)
+        {
+            lock (_lockLog)
+            {
+                _logBuffer.Append(e.Data);
+            }
+        }
 
-		private void Write_Log(string str)
-		{
-			Sdoaq_LogDataReceived(null, new LoggerEventArgs(str));
+        private void Write_Log(string str)
+        {
+			Sdoaq_LogDataReceived(null, new LoggerEventArgs(str + Environment.NewLine));
 		}
-
+        
 
         private void btn_SingleShotEDoF_Click(object sender, EventArgs e)
         {
@@ -163,22 +159,22 @@ namespace SdoaqEdof
 			GetSdoaqObj()?.SetParam(SDOAQ_API.eParameterId.pi_edof_scale_correction_dst_step, txt_ScaleStep.Text);
 		}
 
-		private void btn_OpenCalibration_Click(object sender, EventArgs e)
-		{
-			string fullName = "";
+        private void btn_OpenCalibration_Click(object sender, EventArgs e)
+        {
+            string fullName = "";
 			if (openFile.ShowDialog() == DialogResult.OK)
 			{
-				fullName = openFile.FileName;
+                fullName = openFile.FileName;
 
-				var rv_sdoaq = SDOAQ_API.SDOAQ_SetCalibrationFile(fullName);
-			}
-		}
+                var rv_sdoaq = SDOAQ_API.SDOAQ_SetCalibrationFile(fullName);
+            }
+        }
 
-		private void OpenFileDialogSet()
-		{
-			openFile.Title = "Select calibration file for objective";
-			openFile.FileName = "";
-			openFile.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
-		}
+        private void OpenFileDialogSet()
+        {
+            openFile.Title = "Select calibration file for objective";
+            openFile.FileName = "";
+            openFile.Filter = "csv files (*.csv)|*.csv|All files (*.*)|*.*";
+        }		
 	}
 }

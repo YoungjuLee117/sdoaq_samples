@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Diagnostics;
 
 using SDOAQNet;
 using SDOAQNet.Component;
@@ -58,12 +59,11 @@ namespace SdoaqEdof
 
 		private void Frm_Load()
 		{
-			//================================================================================================================
-			//
-			// If you capture images directly without using SDOAQ library, you do not need to perform library initialization.
-			//
-			//================================================================================================================
-            SdoaqController.SDOAQ_Initialize(false);
+			//----------------------------------------------------------------------------
+			//	If you capture images directly without using SDOAQ library,
+			//	you do not need to perform library initialization.
+			//----------------------------------------------------------------------------
+			SdoaqController.SDOAQ_Initialize(false);
 
 			var version = SDOAQ_EDOF_API.SDOAQ_EDOF_GetVersion();
 			Write_Log($"SD EDoF Algorithm version = {version}");
@@ -109,11 +109,8 @@ namespace SdoaqEdof
 			{
 				fullName = openFile.FileName;
 
-				var rv_sdoaq = SDOAQ_API.SDOAQ_SetCalibrationFile(fullName);
-
-
 				//----------------------------------------------------------------------------
-				//		Specify the calibration file before proceeding.
+				//	Specify the calibration file before proceeding.
 				//----------------------------------------------------------------------------
 				var rv_edof = SDOAQ_EDOF_API.SDOAQ_EDOF_InitializeFromCalibFile(fullName);
 			}
@@ -127,8 +124,8 @@ namespace SdoaqEdof
 			var focusImagePointerList = new IntPtr[focusList.Length];
 
 			//----------------------------------------------------------------------------
-			// If you capture images directly without using SDOAQ library,
-			// there's no need to execute the image capture code below.
+			//	If you capture images directly without using SDOAQ library,
+			//	there's no need to execute the image capture code below.
 			//----------------------------------------------------------------------------
 			if (true)
 			{
@@ -161,6 +158,17 @@ namespace SdoaqEdof
 					return;
 				}
 			}
+            
+
+			double.TryParse(cmb_EdofResizeRatio.SelectedItem.ToString(), out double resize_ratio);
+			Int32.TryParse(txt_KernelSize.Text, out int pixelwise_kernel_size);
+			Int32.TryParse(txt_Iteration.Text, out int pixelwise_iteration);
+			Double.TryParse(txt_Threshold.Text, out double depth_quality_th);
+			Int32.TryParse(txt_ScaleStep.Text, out int dst_step);
+
+
+			Stopwatch edofRun = new Stopwatch();
+			edofRun.Start();
 
 			//----------------------------------------------------------------------------
 			//
@@ -171,35 +179,6 @@ namespace SdoaqEdof
 			//		Don't forget to specify the calibration file before proceeding.
 			//
 			//----------------------------------------------------------------------------
-
-			SDOAQ_EDOF_API.SDOAQ_EDOF_FocalStackParams inParams = new SDOAQ_EDOF_API.SDOAQ_EDOF_FocalStackParams();
-			inParams.focus_measure = SDOAQ_EDOF_API.SDOAQ_EDOF_FocusMeasure.MODIFIED_LAPLACIAN;
-			inParams.image_num = focusList.Length;
-			inParams.image_width = acqParam.cameraRoiWidth;
-			inParams.image_height = acqParam.cameraRoiHeight;
-			inParams.image_offset_x = acqParam.cameraRoiLeft;
-			inParams.image_offset_y = acqParam.cameraRoiTop;
-			inParams.binning_x = 1;
-			inParams.binning_y = 1;
-			inParams.num_channel = camInfo.ColorByte; // depending on the captured image color
-			inParams.byte_per_channel = 1;
-			inParams.num_padding_bit = 0;
-			//inParams.roi_top = acqParam.cameraRoiTop;
-			//inParams.roi_left = acqParam.cameraRoiLeft;
-			//inParams.roi_width = inParams.image_width;
-			//inParams.roi_height = inParams.image_height;
-
-			double.TryParse(cmb_EdofResizeRatio.SelectedItem.ToString(), out double resize_ratio);
-			Int32.TryParse(txt_KernelSize.Text, out int pixelwise_kernel_size);
-			Int32.TryParse(txt_Iteration.Text, out int pixelwise_iteration);
-
-			Double.TryParse(txt_Threshold.Text, out double depth_quality_th);
-
-			Int32.TryParse(txt_ScaleStep.Text, out int dst_step);
-
-			Stopwatch edofRun = new Stopwatch();
-			edofRun.Start();
-
 			int rv = GetSdoaqObj().RunEdof(focusImagePointerList, focusList, 
                 camInfo.ImgSize , camInfo.ColorByte, 
                 ref acqParam, 
@@ -208,6 +187,7 @@ namespace SdoaqEdof
                 pixelwise_iteration, 
                 depth_quality_th, 
                 dst_step);
+
 			edofRun.Stop();
 			Write_Log($"SDOAQ_EDOF_Run() takes {edofRun.Elapsed.TotalMilliseconds.ToString()} ms.");
 

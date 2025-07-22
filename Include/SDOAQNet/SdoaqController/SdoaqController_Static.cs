@@ -138,14 +138,7 @@ namespace SDOAQNet
             s_logger = null;
         }
 
-		public static bool SDOAQ_RegisterMoveOk()
-		{
-			var rv = SDOAQ_API.SDOAQ_RegisterMoveokCallback(CallBack_SDOAQ_MoveOk);
-
-			return rv == SDOAQ_API.eErrorCode.ecNoError;
-		}
-
-		public static string GetVersion()
+        public static string GetVersion()
         {
             return $"{SDOAQ_API.SDOAQ_GetMajorVersion()}.{SDOAQ_API.SDOAQ_GetMinorVersion()}.{SDOAQ_API.SDOAQ_GetPatchVersion()}";
         }
@@ -272,23 +265,7 @@ namespace SDOAQNet
             WriteLog(Logger.emLogLevel.API, $"[Error]Error Code = {errorCode}, {pErrorMessage}");
         }
 
-		private static void OnSdoaq_MoveOk(SDOAQ_API.eErrorCode errorCode, IntPtr callbackUserData)
-		{			
-			WriteLog(Logger.emLogLevel.API, "OnSdoaq_MoveOk");
-
-			if (errorCode != SDOAQ_API.eErrorCode.ecNoError)
-			{
-				// Handle error:
-				// - retry image capture
-				// - skip this cycle
-				// - log and continue
-				return;
-			}
-
-			// Motion trigger logic here
-		}
-
-		private static void OnSdoaq_InitDone(SDOAQ_API.eErrorCode errorCode, StringBuilder pErrorMessage)
+        private static void OnSdoaq_InitDone(SDOAQ_API.eErrorCode errorCode, StringBuilder pErrorMessage)
         {
             bool bInitDone = errorCode == SDOAQ_API.eErrorCode.ecNoError;
 
@@ -370,7 +347,18 @@ namespace SDOAQNet
 
             //WriteLog(Logger.emLogLevel.Info, $"[CAM{idx}] CallBack MoveOK, ErrorCode = {errorCode}, callBackUserData = 0x{callbackUserData.ToString("X8")}");
             WriteLog(Logger.emLogLevel.Info, $"[CAM{idx}] CallBack MoveOK, ErrorCode = {errorCode}");
-        }
+
+			if (errorCode != SDOAQ_API.eErrorCode.ecNoError)
+			{
+				// Handle error:
+				// - retry image capture
+				// - skip this cycle
+				// - log and continue
+				return;
+			}
+
+			// Motion trigger logic here
+		}
 
         #region CallBackFunc Player 
         private static void OnSdoaq_PlayFocusStack(SDOAQ_API.eErrorCode errorCode, int lastFilledRingBufferEntry, IntPtr callbackUserData)

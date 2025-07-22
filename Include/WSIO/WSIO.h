@@ -81,7 +81,7 @@ enum WSIORV_Enum
 	WSIORV_ARG_STRISTOOLONG				= -2012,		// String argument is too long
 	WSIORV_ARG_BLOCKISTOOLONG			= -2021,		// Block argument is too long
 	WSIORV_ARG_BUFISNOTSUFFICIENT		= -2013,		// String buffer argument is not sufficent.
-	WSIORV_ARG_NULLPOINTER				= -2035,		// There is one or more null pointer arguments.
+	WSIORV_ARG_NULLPOINTER				= -2035,		// There is one or more null pointer and/or null string arguments.
 	WSIORV_TIMEOUT						= -2014,
 	//WSIORV_NOWINDOWENVIRONMENT			= -2015,
 	WSIORV_MAINHWNDALREADYASSIGNED		= -2016,

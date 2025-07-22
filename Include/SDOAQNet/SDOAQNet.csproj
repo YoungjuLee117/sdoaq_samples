@@ -37,11 +37,11 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Drawing.Common, Version=9.0.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
-      <HintPath>packages\System.Drawing.Common.9.0.7\lib\net462\System.Drawing.Common.dll</HintPath>
+      <HintPath>..\..\packages\System.Drawing.Common.9.0.7\lib\net462\System.Drawing.Common.dll</HintPath>
     </Reference>
     <Reference Include="System.Numerics" />
     <Reference Include="System.Numerics.Vectors, Version=4.1.6.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <HintPath>packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
+      <HintPath>..\..\packages\System.Numerics.Vectors.4.6.1\lib\net462\System.Numerics.Vectors.dll</HintPath>
     </Reference>
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
@@ -85,31 +85,31 @@
     <Compile Include="SdoaqController\SdoaqController_Param.cs" />
     <Compile Include="SdoaqController\SdoaqController_Static.cs" />
     <Compile Include="..\SDOAQ\SDOAQ_EDOF.cs">
-        <Link>SDOAQ\SDOAQ_EDOF.cs</Link>
+      <Link>SDOAQ\SDOAQ_EDOF.cs</Link>
     </Compile>
-    <Compile Include="..\SDOAQ\SDOAQ_LLAPI.cs" >
-        <Link>SSDOAQ\SDOAQ_LLAPI.cs</Link>
+    <Compile Include="..\SDOAQ\SDOAQ_LLAPI.cs">
+      <Link>SSDOAQ\SDOAQ_LLAPI.cs</Link>
     </Compile>
     <Compile Include="..\SDOAQ\SDOAQ_MULTIWS.cs">
-        <Link>SDOAQ\SDOAQ_MULTIWS.cs</Link>
+      <Link>SDOAQ\SDOAQ_MULTIWS.cs</Link>
     </Compile>
     <Compile Include="..\SDOAQ\SDOAQ_WS.cs">
-        <Link>SDOAQ\SDOAQ_WS.cs</Link>
+      <Link>SDOAQ\SDOAQ_WS.cs</Link>
     </Compile>
     <Compile Include="..\WSIO\WSIO.cs">
-        <Link>SDWSIO\WSIO.cs</Link>
+      <Link>SDWSIO\WSIO.cs</Link>
     </Compile>
     <Compile Include="..\WSIO\WSIO_GL.cs">
-        <Link>SDWSIO\WSIO_GL.cs</Link>
+      <Link>SDWSIO\WSIO_GL.cs</Link>
     </Compile>
     <Compile Include="..\WSIO\WSIO_GL_DEFINE.cs">
-        <Link>SDWSIO\WSIO_GL_DEFINE.cs</Link>
+      <Link>SDWSIO\WSIO_GL_DEFINE.cs</Link>
     </Compile>
     <Compile Include="..\WSIO\WSIO_UTIL.cs">
-        <Link>SDWSIO\WSIO_UTIL.cs</Link>
+      <Link>SDWSIO\WSIO_UTIL.cs</Link>
     </Compile>
     <Compile Include="..\WSIO\WSIO_WSIF.cs">
-        <Link>SDWSIO\WSIO_WSIF.cs</Link>
+      <Link>SDWSIO\WSIO_WSIF.cs</Link>
     </Compile>
     <Compile Include="Tool\EventArgs\LoggerEventArgs.cs" />
     <Compile Include="Tool\EventArgs\QueueWorkerMessageEventArgs.cs" />
@@ -129,9 +129,6 @@
     <Compile Include="Tool\SdoaqScriptReader.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
-  </ItemGroup>
-  <ItemGroup>
     <EmbeddedResource Include="Component\SdoaqCameraPredefinedParams.resx">
       <DependentUpon>SdoaqCameraPredefinedParams.cs</DependentUpon>
     </EmbeddedResource>
@@ -142,6 +139,8 @@
       <DependentUpon>SdoaqParams.cs</DependentUpon>
     </EmbeddedResource>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -188,16 +188,8 @@ extern "C"
 
 
 	//================================================================================================
-	//		CUDA EDOF
+	//		CUDA-based EDOF
 	//================================================================================================
-
-	//enum SDOAQ_CUDA_EDOF_ErrorCode
-	//{
-	//	SUCCESS = 1,
-	//	ERROR_FAILED = -1,
-	//	ERROR_NOT_INITIALIZED = -2,
-	//	ERROR_NOT_LICENSED = -7,
-	//};
 
 	struct SDOAQ_CUDA_EDOF_Params
 	{

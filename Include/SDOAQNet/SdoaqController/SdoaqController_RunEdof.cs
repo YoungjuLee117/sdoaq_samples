@@ -1,31 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
-using SDOAQ;
 using SDOAQ_EDOF;
 using SDOAQNet.Tool;
 
 namespace SDOAQNet
 {
-    partial class SdoaqController
+	partial class SdoaqController
     {
         public int RunEdof(IntPtr[] focusImagePointerList, int[] focusList, 
             int imageSize, int colorByte,
             ref SDOAQ.SDOAQ_API.AcquisitionFixedParametersEx acqParam,
             double resize_ratio, int pixelwise_kernel_size, int pixelwise_iteration, double depth_quality_th, int dst_step)
-        {
-            //----------------------------------------------------------------------------
-            //
-            //		Starting point of the EDOF algorithm execution.
-            //
-            //		Make sure to set each parameter to a suitable value.
-            //
-            //		Don't forget to specify the calibration file before proceeding.
-            //
-            //----------------------------------------------------------------------------
+        {            
             var inParams = new SDOAQ_EDOF_API.SDOAQ_EDOF_FocalStackParams
             {
                 focus_measure = SDOAQ_EDOF_API.SDOAQ_EDOF_FocusMeasure.MODIFIED_LAPLACIAN,
@@ -91,5 +77,87 @@ namespace SDOAQNet
 
             return rv_edof;
         }
-    }
+
+		public int RunCudaEdof(IntPtr[] focusImagePointerList, int[] focusList,
+		   int imageSize, int colorByte,
+		   ref SDOAQ.SDOAQ_API.AcquisitionFixedParametersEx acqParam,
+		   double resize_ratio, int pixelwise_iteration, double depth_quality_th, int dst_step, string calib_file)
+		{	
+			SDOAQ_CUDA_EDOF_API.SDOAQ_CUDA_EDOF_Params edofParams = new SDOAQ_CUDA_EDOF_API.SDOAQ_CUDA_EDOF_Params();
+			edofParams.numMalsStep = focusList.Length;
+			edofParams.imageWidth = acqParam.cameraRoiWidth;
+			edofParams.imageHeight = acqParam.cameraRoiHeight;
+			edofParams.imageOffsetX = acqParam.cameraRoiLeft;
+			edofParams.imageOffsetY = acqParam.cameraRoiTop;
+			edofParams.pixelColorType = colorByte;
+			edofParams.samplingMode = resize_ratio;
+			edofParams.pixelwiseKernelIteration = pixelwise_iteration;
+			edofParams.depthThreshold = depth_quality_th;
+			edofParams.isScaleCorrectionEnabled = true;
+			edofParams.scaleCorrectionDstStep = dst_step;
+
+
+			// 1. Initialize EDoF algorithm library with EDoF parameter and calibration file
+			// Call SDOAQ_CUDAEDOF_InitializeLibrary() when calibration data or core parameters are changed.
+			// For updating certain tunable parameters at runtime, use SDOAQ_CUDAEDOF_UpdateParams() without reinitializing.
+			var rv_edof = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_InitializeLibrary(ref edofParams, calib_file);
+			if (0 > rv_edof)
+			{				
+				return rv_edof;
+			}
+
+
+			// 2. Register memory with cudaHostRegister
+			for (int i = 0; i < focusList.Length; i++)
+			{
+				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_RegisterMemory(focusImagePointerList[i], sizeof(byte) * imageSize);
+			}
+
+
+			// 3. Add focus stack image to the algorithm
+			for (int i = 0; i < focusList.Length; i++)
+			{
+				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_AddImage(focusImagePointerList[i], i);
+			}
+
+
+			// 4. Run EDoF algorithm and generate output image
+			var bufferEdofImage = new byte[imageSize];
+			unsafe
+			{
+				fixed (byte* p = bufferEdofImage)
+				{
+					IntPtr ptr = (IntPtr)p;
+
+					SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_RegisterMemory(ptr, sizeof(byte) * imageSize);
+
+					rv_edof = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_Run(ptr);
+
+					SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_UnregisterMemory(ptr);
+				}
+			}
+
+
+			// 5. Unregister memory with cudaHostUnregister
+			for (int i = 0; i < focusList.Length; i++)
+			{
+				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_UnregisterMemory(focusImagePointerList[i]);
+			}
+			
+
+			var imgInfoList = new List<SdoaqImageInfo>();
+			if (rv_edof >= 0)
+			{
+				imgInfoList.Add(new SdoaqImageInfo("CUDA Edof",
+					acqParam.cameraRoiWidth, acqParam.cameraRoiHeight,
+					acqParam.cameraRoiWidth * colorByte,
+					colorByte,
+					bufferEdofImage));
+
+				CallBackMessageProcessed?.Invoke(this, new CallBackMessageEventArgs(emCallBackMessage.Edof, imgInfoList));
+			}
+
+			return rv_edof;
+		}
+	}
 }

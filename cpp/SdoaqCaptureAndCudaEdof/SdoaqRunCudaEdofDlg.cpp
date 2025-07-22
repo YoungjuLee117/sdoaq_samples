@@ -217,7 +217,7 @@ LRESULT CSdoaqEdofDlg::OnInitDone(WPARAM wErrorCode, LPARAM lpMessage)
 		g_LogLine(_T("sdoaq cuda edof dll version is \"%d\""), ver);
 
 		m_nCudaAvailability = ::SDOAQ_CUDAEDOF_CheckAvailability();
-		g_LogLine(_T("sdoaq cuda availability  \"%d\""), m_nCudaAvailability);
+		g_LogLine(_T("sdoaq cuda availability is \"%d\""), m_nCudaAvailability);
 
 		if (m_nCudaAvailability < 0)
 		{

@@ -1,33 +1,33 @@
-﻿namespace SdoaqEdof
+﻿namespace SdoaqCudaEdof
 {
-    partial class SdoaqRunCudaEDoF
-    {
-        /// <summary>
-        /// 필수 디자이너 변수입니다.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
+	partial class SdoaqRunCudaEDoF
+	{
+		/// <summary>
+		/// 필수 디자이너 변수입니다.
+		/// </summary>
+		private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// 사용 중인 모든 리소스를 정리합니다.
-        /// </summary>
-        /// <param name="disposing">관리되는 리소스를 삭제해야 하면 true이고, 그렇지 않으면 false입니다.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
+		/// <summary>
+		/// 사용 중인 모든 리소스를 정리합니다.
+		/// </summary>
+		/// <param name="disposing">관리되는 리소스를 삭제해야 하면 true이고, 그렇지 않으면 false입니다.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && (components != null))
+			{
+				components.Dispose();
+			}
+			base.Dispose(disposing);
+		}
 
-        #region Windows Form 디자이너에서 생성한 코드
+		#region Windows Form 디자이너에서 생성한 코드
 
-        /// <summary>
-        /// 디자이너 지원에 필요한 메서드입니다. 
-        /// 이 메서드의 내용을 코드 편집기로 수정하지 마세요.
-        /// </summary>
-        private void InitializeComponent()
-        {
+		/// <summary>
+		/// 디자이너 지원에 필요한 메서드입니다. 
+		/// 이 메서드의 내용을 코드 편집기로 수정하지 마세요.
+		/// </summary>
+		private void InitializeComponent()
+		{
 			this.components = new System.ComponentModel.Container();
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SdoaqRunCudaEDoF));
 			this.tlp_Main = new System.Windows.Forms.TableLayoutPanel();
@@ -55,7 +55,7 @@
 			this.label2 = new System.Windows.Forms.Label();
 			this.label1 = new System.Windows.Forms.Label();
 			this.btn_OpenCalibration = new System.Windows.Forms.Button();
-			this.pnl_Viewer = new SDOAQCSharp.Component.SdoPanel();
+			this.pnl_Viewer = new SDOAQNet.Component.SdoPanel();
 			this.tmr_LogUpdate = new System.Windows.Forms.Timer(this.components);
 			this.openFile = new System.Windows.Forms.OpenFileDialog();
 			this.tlp_Main.SuspendLayout();
@@ -94,9 +94,9 @@
 			// 
 			// txt_Log
 			// 
-			this.txt_Log.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
+			this.txt_Log.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+			| System.Windows.Forms.AnchorStyles.Left)
+			| System.Windows.Forms.AnchorStyles.Right)));
 			this.txt_Log.Location = new System.Drawing.Point(11, 390);
 			this.txt_Log.Margin = new System.Windows.Forms.Padding(2);
 			this.txt_Log.Name = "txt_Log";
@@ -140,9 +140,9 @@
 			this.cmb_EdofResizeRatio.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
 			this.cmb_EdofResizeRatio.FormattingEnabled = true;
 			this.cmb_EdofResizeRatio.Items.AddRange(new object[] {
-            "1",
-            "0.5",
-            "0.25"});
+			"1",
+			"0.5",
+			"0.25"});
 			this.cmb_EdofResizeRatio.Location = new System.Drawing.Point(350, 31);
 			this.cmb_EdofResizeRatio.Name = "cmb_EdofResizeRatio";
 			this.cmb_EdofResizeRatio.Size = new System.Drawing.Size(160, 23);
@@ -369,38 +369,38 @@
 			this.groupBox1.PerformLayout();
 			this.ResumeLayout(false);
 
-        }
+		}
 
-        #endregion
+		#endregion
 
-        private System.Windows.Forms.TableLayoutPanel tlp_Main;
-        private System.Windows.Forms.Panel pnl_Controls;
-        private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.Button btn_OpenCalibration;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Button btn_SetResizeRatio;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Button btn_SetMALSFocus;
-        private System.Windows.Forms.TextBox txt_MALSFocus;
-        private System.Windows.Forms.Button btn_SetROI;
-        private System.Windows.Forms.TextBox txt_ROI;
-        private System.Windows.Forms.Button btn_SetScaleStep;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.TextBox txt_ScaleStep;
-        private System.Windows.Forms.Button btn_SetThreshold;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TextBox txt_Threshold;
-        private System.Windows.Forms.Button btn_SetIteration;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.TextBox txt_Iteration;
-        private System.Windows.Forms.Button btn_RunCudaEDoF;
-        private System.Windows.Forms.RichTextBox txt_Log;
-        private SDOAQCSharp.Component.SdoPanel pnl_Viewer;
-        private System.Windows.Forms.Timer tmr_LogUpdate;
-        private System.Windows.Forms.ComboBox cmb_EdofResizeRatio;
-        private System.Windows.Forms.OpenFileDialog openFile;
-    }
+		private System.Windows.Forms.TableLayoutPanel tlp_Main;
+		private System.Windows.Forms.Panel pnl_Controls;
+		private System.Windows.Forms.GroupBox groupBox2;
+		private System.Windows.Forms.GroupBox groupBox1;
+		private System.Windows.Forms.Button btn_OpenCalibration;
+		private System.Windows.Forms.Label label2;
+		private System.Windows.Forms.Label label1;
+		private System.Windows.Forms.Button btn_SetResizeRatio;
+		private System.Windows.Forms.Label label3;
+		private System.Windows.Forms.Button btn_SetMALSFocus;
+		private System.Windows.Forms.TextBox txt_MALSFocus;
+		private System.Windows.Forms.Button btn_SetROI;
+		private System.Windows.Forms.TextBox txt_ROI;
+		private System.Windows.Forms.Button btn_SetScaleStep;
+		private System.Windows.Forms.Label label7;
+		private System.Windows.Forms.TextBox txt_ScaleStep;
+		private System.Windows.Forms.Button btn_SetThreshold;
+		private System.Windows.Forms.Label label6;
+		private System.Windows.Forms.TextBox txt_Threshold;
+		private System.Windows.Forms.Button btn_SetIteration;
+		private System.Windows.Forms.Label label5;
+		private System.Windows.Forms.TextBox txt_Iteration;
+		private System.Windows.Forms.Button btn_RunCudaEDoF;
+		private System.Windows.Forms.RichTextBox txt_Log;
+		private SDOAQNet.Component.SdoPanel pnl_Viewer;
+		private System.Windows.Forms.Timer tmr_LogUpdate;
+		private System.Windows.Forms.ComboBox cmb_EdofResizeRatio;
+		private System.Windows.Forms.OpenFileDialog openFile;
+	}
 }
 
