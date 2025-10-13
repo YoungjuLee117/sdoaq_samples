@@ -60,6 +60,7 @@ protected:
 	afx_msg LRESULT OnReceiveAF(WPARAM wErrorCode, LPARAM lMsgParaReceiveAf);
 	afx_msg LRESULT OnReceiveSnap(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry);
 
+	afx_msg void OnCheckSimulMode();
 	afx_msg void OnSdoaqInitialize();
 	afx_msg void OnSdoaqFinalize();
 	afx_msg void OnSelectedCombobox();

@@ -60,6 +60,16 @@ inline CString FString(LPCTSTR sFormat, ...)
 	s.FormatV(sFormat, args);
 	return s;
 }
+
+//----------------------------------------------------------------------------
+CString GetCurrentDir()
+{
+	TCHAR currentDir[MAX_PATH];
+	::GetCurrentDirectory(MAX_PATH, currentDir);
+	return currentDir;
+}
+
+
 //============================================================================
 
 CSdoaqMultiCameraFrameCallbackDlg::CSdoaqMultiCameraFrameCallbackDlg(CWnd* pParent /*=nullptr*/)
@@ -131,6 +141,9 @@ BOOL CSdoaqMultiCameraFrameCallbackDlg::OnInitDialog()
 	// register multiple wisescopes uses before initialization
 	g_LogLine(_T("register SDOAQ Multiple WiseScope"));
 	::SDOAQ_RegisterMultiWsApi();
+
+	// set the cam files folder path
+	::SDOAQ_SetCamfilePath(CT2A(FString(_T("%s\\..\\..\\Include\\SDOAQ\\CamFiles"), GetCurrentDir())));
 
 	g_LogLine(_T("start initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);

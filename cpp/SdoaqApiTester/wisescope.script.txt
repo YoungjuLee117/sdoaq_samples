@@ -16,7 +16,10 @@
  # Number of WSM = 2
 
  Image Manager Size GB = 1 # DV=1.0 , Unit:GB
-  
+
+ Feature TSMC Probe Tip Algorithm = false
+ AM74 SdEdofV2CudaParams edofPixelColorType = -1
+ 
  # Patch
  # Patch = { item1 , item2 , ... }
  #Patch = { 1251 }
@@ -33,6 +36,8 @@
 #----------------------------------------------------------------------------------------------
  #MALS Device = { Auto , Auto , 2.0 , 1.0 }   # DV = { NONE , Simul , 0 , 0 }
  MALS Device = { Auto , Simul , 1.8 , 1.0 }
+
+ TPSU Simul attributes = { STEP = 320S, LENS = 7 }
 #----------------------------------------------------------------------------------------------
 
 
@@ -70,6 +75,7 @@
  #Camera Gain = 0
  #Pylon USB Line Number = Line2   # DV = Line2, none / Line2 / Line3 / both
 #----------------------------------------------------------------------------------------------
+ #Camera Model (V2) = { Auto , -1 }
  Camera Model (V2) = { Simul-2040-1086-color , -1 }
  Camera Trigger Method = Software 
  Full Focus Simul Image = C:\\Simul.Zstack
@@ -108,6 +114,12 @@
  
  #Lighting Device (V3) 1 = { LCBPWM , L , Auto ,  0 ,  0 , -2 , -1 , 1000000 }
  #Lighting Device (V3) 1 attributes = { strobe = on }
+
+ #Lighting Device (V3) 1 = { LCBPWM & SDZEISS & TPSU , L , Auto ,  103 ,  1 , -2 , -1 , 1000000 }
+ #Lighting Device (V3) 1 attributes = { strobe = off }
+
+ #Lighting Device (V3) 1 = { IPULSE , L , Auto ,  0 ,  100 , -2 , -1 , 1000000 }
+ #Lighting Device (V3) 1 attributes = { pulse = 1000.0 }
 
  #Lighting Device (V3) 1 = { Null , External , Simul ,  0 ,  0 , -2 , -1 , 1000000 }
 #----------------------------------------------------------------------------------------------

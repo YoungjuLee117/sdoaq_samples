@@ -89,6 +89,9 @@ BOOL CSdoaqEdofDlg::OnInitDialog()
 	// If you capture images directly without using SDOAQ library, you do not need to perform library initialization.
 	//
 	//================================================================================================================
+	// set the cam files folder path
+	::SDOAQ_SetCamfilePath(FStringA("%s\\..\\..\\Include\\SDOAQ\\CamFiles", (CStringA)GetCurrentDir()));
+
 	g_LogLine(_T("start SDOAQ initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);
 	if (ecNoError != rv_sdoaq)

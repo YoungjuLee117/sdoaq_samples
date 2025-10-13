@@ -1,5 +1,5 @@
 ===============================================================================================================================================================
-  Version     Release date     Author       Descriptions
+  Version     Release date     Author        Descriptions
 ===============================================================================================================================================================
 
  SDOAQ_v1.00   2020-03-05    YoungJu Lee    - The illumination operates in continuous mode and the maximum intensity is limited to 30
@@ -56,7 +56,7 @@
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
                2022.08.02    YoungJu Lee    - Add SDOAQ_SetExternalCalibrationTable API and objective id oi_user_defined
                                             - Add piSavePixelBits as the depth of the pixel values when saving image
---------------------------------------------------------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
                2022.10.25    YoungJu Lee    - Add SDOAQ_StartContinuousSingleFocusStack API and piSingleFocus parameter for continuous acquisition while changing single focus
                                             - Add piFocusMeasureMethod parameter for selecting focus measure method
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -180,4 +180,9 @@
                                             - Added support for camera-specific white balance control. Currently available for USB Pylon, Clink, and select verified CXP cameras
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------
  SDOAQ_v2.8.6  2025.07.15    YoungJu Lee    - Added CUDA-based EDoF algorithm interface
+---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ SDOAQ_v2.8.7  2025.10.02    YoungJu Lee    - Added a parameter to set simulation mode (piFullSimulationMode)
+                                            - Added a feature to re-run image processing on an already captured camera image
+                                            - Added z250818 algorithm (SDOAQ_AM74_DLL_z250818, pi_edof_channel_count)
+                                            - Added new items to eFocusMeasureMethod enumeration
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------

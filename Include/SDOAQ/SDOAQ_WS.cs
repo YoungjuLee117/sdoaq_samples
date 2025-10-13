@@ -191,6 +191,11 @@ using System.Text;
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	 2.8.6  2025.07.15  YoungJu Lee		- Added CUDA-based EDoF algorithm interface
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 2.8.7  2025.10.02  YoungJu Lee		- Added a parameter to set simulation mode (piFullSimulationMode)
+										- Added a feature to re-run image processing on an already captured camera image
+										- Added z250818 algorithm (SDOAQ_AM74_DLL_z250818, pi_edof_channel_count)
+										- Added new items to eFocusMeasureMethod enumeration
+	--------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 
 
@@ -681,6 +686,10 @@ namespace SDOAQ
 			/// </summary>
 			pi_edof_algorithm_z250609 = 97,          // I - R
 			/// <summary>
+			/// Determines whether SDOAQ_AM74_DLL_z250818 algorithm is available.
+			/// </summary>
+			pi_edof_algorithm_z250818 = 100,		// I - R
+			/// <summary>
 			/// Determines whether Helicon Focus is installed on the host enviroment.
 			/// </summary>
 			pi_edof_algorithm_heliconfocus = 98,     // I - R
@@ -748,6 +757,11 @@ namespace SDOAQ
 			/// </summary>
 			pi_edof_scale_correction_dst_step = 69, // I - R/W
 
+			/// <summary>
+			/// 
+			pi_edof_channel_count = 101,	// I - R/W
+			/// </summary>
+		
 			/// <summary>
 			/// focus measure (sharpness measure) method (0: Modified Laplacian, 1: Gradient(Sobel), 2: Graylevel local variance)
 			/// </summary>
@@ -851,10 +865,18 @@ namespace SDOAQ
 			/// <summary>By specifying a log level, only log messages with a higher severity level than the specified log level are provided.</summary>
 			piLogLevel = 92,                    // I - R/W	 (log severity)
 
-			//piNextParameterValue = 99, //250618
+			/// <summary>
+			/// When set to true, all devices (e.g., camera, light, MALS controllers, etc.) will operate in simulation mode,
+			/// regardless of individual hardware configuration settings.
+			/// This flag is useful for debugging, testing, and demo purposes,
+			/// allowing the software to run properly even in environments without actual hardware connected.
+			/// </summary>
+			piFullSimulationMode = 99,
+
+			//piNextParameterValue = 102, //250822
 
 			/// <summary>Unsupported parameter was requested. Also used as "end" marker internally.</summary>
-			piInvalidParameter = 100
+			piInvalidParameter = 10000
 		};
 				
 		public enum eCameraColor
@@ -888,11 +910,24 @@ namespace SDOAQ
 
 		public enum eFocusMeasureMethod
 		{
+			// common
 			fmModifiedLaplacian = 0,
-			fmGrayLevelLocalVariance = 1,
 			fmTenengradGradient = 2,
-			//fmCustomized1, // reserved, not yet implemented
-			//fmCustomized2 // reserved, not yet implemented
+			fmBrightness = 3,
+			fmDarkness = 4,
+
+			// based-on cpu
+			fmGrayLevelLocalVariance = 1,
+
+			// based-on cuda
+			fmAverage = 5,
+			fmRingDifference = 6,
+			fmModifiedSobel = 7,
+			fmIntensity = 8,
+
+			// for reserved
+			fmCustomized = 100,
+
 			fmMax
 		};
 
@@ -904,6 +939,7 @@ namespace SDOAQ
 		public const int SDOAQ_AM68_DLL_EDOF_CUDA_DEMO_CMP = 68;// multi-result, cuda edof + single middle focus
 		public const int SDOAQ_AM70_DLL_EDOF_BETA = 70;         // experimental version
 		public const int SDOAQ_AM71_DLL_z250609 = 71;           // private release
+		public const int SDOAQ_AM74_DLL_z250818 = 74;           // private release
 
 		// gets information about parameter
 		// The correct value is read after the SDOAQ_Initialize API completes.
@@ -1018,8 +1054,16 @@ namespace SDOAQ
 			/// </summary>
 			public IntPtr callbackUserData;
 
+			///---------------------------------------------------------------------------------------------
+			/// The following fields are valid from version 4.
 
-			public void Reset(int cameraRoiLeft = 0, int cameraRoiTop = 0, int cameraRoiWidth = 0, int cameraRoiHeight = 0, int cameraBinning = 1, int version = 3)
+			/// <summary>
+			/// If the bit below is non-zero, image processing is performed using the previous image set without re-acquisition.
+			/// </summary>
+			public int reprocessLastImage;
+
+
+			public void Reset(int cameraRoiLeft = 0, int cameraRoiTop = 0, int cameraRoiWidth = 0, int cameraRoiHeight = 0, int cameraBinning = 1, int version = 4, int reprocessLastImage = 0)
 			{
                 this.ver = version;
                 this.cameraRoiLeft = cameraRoiLeft;
@@ -1028,7 +1072,8 @@ namespace SDOAQ
                 this.cameraRoiHeight = cameraRoiHeight;
                 this.cameraBinning = cameraBinning;
                 this.callbackUserData = IntPtr.Zero;
-            }
+				this.reprocessLastImage = reprocessLastImage;
+			}
 
 			public void SetCallBackUserData(IntPtr callBackUserData)
 			{
@@ -1443,7 +1488,7 @@ namespace SDOAQ
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		/* deprecated. Instead, use SDOAQ_StopEdof */public static extern eErrorCode SDOAQ_StopContinuousEdof();
 
-		
+	
 		//////////////////////////////////////////////////////////////////////////////////////////////////////////
 		//
 		// Functions and types needed to acquire a single AF image or an AF preview ...

@@ -214,6 +214,9 @@ LRESULT CSdoaqMultiLightingDlg::OnInitDone(WPARAM wErrorCode, LPARAM lpMessage)
 //----------------------------------------------------------------------------
 void CSdoaqMultiLightingDlg::OnBtnInitialize()
 {
+	// set the cam files folder path
+	::SDOAQ_SetCamfilePath(FStringA("%s\\..\\..\\Include\\SDOAQ\\CamFiles", (CStringA)GetCurrentDir()));
+
 	g_LogLine(_T("start sdoaq initialization..."));
 
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);

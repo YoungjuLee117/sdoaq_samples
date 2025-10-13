@@ -156,13 +156,17 @@ enum WSUTIVFLIPBITS_Enum
 typedef int WSUTWEVTCODE;
 enum WSUTWEVTCODE_Enum
 {
-	WSUTWEVTCODE_BTNCLK				= 0x0011,
+	WSUTWEVTCODE_BTNCLK				= 0x0011,	// Generated additionally when WSUTWEVTCODE_LBTNDN or WSUTWEVTCODE_RBTNDN events occur.
 	WSUTWEVTCODE_LBTNDN				= 0x0021,
 	WSUTWEVTCODE_LBTNUP				= 0x0022,
 	WSUTWEVTCODE_LBTNDCLK			= 0x0023,
 	WSUTWEVTCODE_RBTNDN				= 0x0031,
 	WSUTWEVTCODE_RBTNUP				= 0x0032,
 	WSUTWEVTCODE_RBTNDCLK			= 0x0033,
+
+	WSUTWEVTCODE_EDITCHECK			= 0x1011,	// Generated additionally when WSUTWEVTCODE_ENTERDOWN or WSUTWEVTCODE_FOCUSOUT events occur
+	WSUTWEVTCODE_FOCUSOUT			= 0x1112,
+	WSUTWEVTCODE_ENTERDOWN			= 0x1221,
 
 	WSUTWEVTCODE_REQLAYOUT			= 0x4101,
 	WSUTWEVTCODE_VALUEUPDATED		= 0x4201,
@@ -581,5 +585,14 @@ WSIO_CS_API WSIORV WSUT_GenerateRainbowColorMap_cs(float* pFloat, int stride, si
 WSIODLL_API WSIOINT			WSUT_CheckLicense_TypeA(
 			void
 			);
+
+//============================================================================
+// GET INSTALLER DATA
+//----------------------------------------------------------------------------
+WSIODLL_API WSIORV WSUT_GetInstalledPath_TypeA(
+	WSIOCSTR target_name_str,
+	WSIOPSTR path_buffer,
+	WSIOUINT size_of_path_buffer
+);
 
 //====================================================================================================================================

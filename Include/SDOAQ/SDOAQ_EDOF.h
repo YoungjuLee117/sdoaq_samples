@@ -14,6 +14,8 @@
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
 	 2.8.6  2020.07.15  YoungJu Lee     - Added CUDA-based EDoF algorithm interface
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 2.8.7  2025.09.00  YoungJu Lee		- Added new items to eFocusMeasureMethod enumeration
+	--------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 
 #pragma once
@@ -41,11 +43,17 @@ extern "C"
 	*/
 	enum class SDOAQ_EDOF_FocusMeasure
 	{
-		MODIFIED_LAPLACIAN,
-		GRAYLEVEL_LOCAL_VARIANCE,
-		TENENGRAD_GRADIENT,
-		CUSTOMIZED1,
-		CUSTOMIZED2
+		// common
+		MODIFIED_LAPLACIAN = 0,
+		TENENGRAD_GRADIENT = 2,
+		BRIGHTNESS = 3,
+		DARKNESS = 4,
+
+		// based-on cpu
+		GRAYLEVEL_LOCAL_VARIANCE = 1,
+		
+		// based-on cuda
+		//AVERAGE = 5,
 	};
 
 	struct SDOAQ_EDOF_FocalStackParams

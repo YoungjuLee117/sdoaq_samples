@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using SDOAQ_EDOF;
 using SDOAQNet.Tool;
 
@@ -96,6 +97,8 @@ namespace SDOAQNet
 			edofParams.isScaleCorrectionEnabled = true;
 			edofParams.scaleCorrectionDstStep = dst_step;
 
+			//Stopwatch edofRun = new Stopwatch();
+			//edofRun.Start();
 
 			// 1. Initialize EDoF algorithm library with EDoF parameter and calibration file
 			// Call SDOAQ_CUDAEDOF_InitializeLibrary() when calibration data or core parameters are changed.
@@ -105,22 +108,28 @@ namespace SDOAQNet
 			{				
 				return rv_edof;
 			}
+			//edofRun.Stop();
+			//Console.WriteLine($"SDOAQ_CUDAEDOF_InitializeLibrary: {edofRun.Elapsed.TotalMilliseconds.ToString()}");
 
-
+			//edofRun.Start();
 			// 2. Register memory with cudaHostRegister
 			for (int i = 0; i < focusList.Length; i++)
 			{
 				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_RegisterMemory(focusImagePointerList[i], sizeof(byte) * imageSize);
 			}
+			//edofRun.Stop();
+			//Console.WriteLine($"SDOAQ_CUDAEDOF_RegisterMemory: {edofRun.Elapsed.TotalMilliseconds.ToString()}");
 
-
+			//edofRun.Start();
 			// 3. Add focus stack image to the algorithm
 			for (int i = 0; i < focusList.Length; i++)
 			{
 				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_AddImage(focusImagePointerList[i], i);
 			}
+			//edofRun.Stop();
+			//Console.WriteLine($"SDOAQ_CUDAEDOF_AddImage: {edofRun.Elapsed.TotalMilliseconds.ToString()}");
 
-
+			//edofRun.Start();
 			// 4. Run EDoF algorithm and generate output image
 			var bufferEdofImage = new byte[imageSize];
 			unsafe
@@ -132,18 +141,21 @@ namespace SDOAQNet
 					SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_RegisterMemory(ptr, sizeof(byte) * imageSize);
 
 					rv_edof = SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_Run(ptr);
+					//edofRun.Stop();
+					//Console.WriteLine($"SDOAQ_CUDAEDOF_Run: {edofRun.Elapsed.TotalMilliseconds.ToString()}");
 
 					SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_UnregisterMemory(ptr);
 				}
 			}
+			
 
-
+			//edofRun.Start();
 			// 5. Unregister memory with cudaHostUnregister
 			for (int i = 0; i < focusList.Length; i++)
 			{
 				SDOAQ_CUDA_EDOF_API.SDOAQ_CUDAEDOF_UnregisterMemory(focusImagePointerList[i]);
 			}
-			
+			//Console.WriteLine($"SDOAQ_CUDAEDOF_UnregisterMemory: {edofRun.Elapsed.TotalMilliseconds.ToString()}");
 
 			var imgInfoList = new List<SdoaqImageInfo>();
 			if (rv_edof >= 0)

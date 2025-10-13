@@ -58,6 +58,15 @@ inline CString FString(LPCTSTR sFormat, ...)
 	s.FormatV(sFormat, args);
 	return s;
 }
+
+//----------------------------------------------------------------------------
+CString GetCurrentDir()
+{
+	TCHAR currentDir[MAX_PATH];
+	::GetCurrentDirectory(MAX_PATH, currentDir);
+	return currentDir;
+}
+
 //============================================================================
 
 CSdoaqCameraFrameCallbackDlg::CSdoaqCameraFrameCallbackDlg(CWnd* pParent /*=nullptr*/)
@@ -119,6 +128,9 @@ BOOL CSdoaqCameraFrameCallbackDlg::OnInitDialog()
 	const int ver_minor = ::SDOAQ_GetMinorVersion();
 	const int ver_patch = ::SDOAQ_GetPatchVersion();
 	g_LogLine(_T("SDOAQ DLL version is \"%d.%d.%d\""), ver_major, ver_minor, ver_patch);
+
+	// set the cam files folder path
+	::SDOAQ_SetCamfilePath(CT2A(FString(_T("%s\\..\\..\\Include\\SDOAQ\\CamFiles"), GetCurrentDir())));
 
 	g_LogLine(_T("start initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);

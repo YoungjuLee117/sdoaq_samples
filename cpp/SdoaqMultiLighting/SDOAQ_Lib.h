@@ -268,3 +268,11 @@ inline CStringA FStringA(char* sFormat, ...)
 	s.FormatV(sFormat, args);
 	return s;
 }
+
+//----------------------------------------------------------------------------
+inline CString GetCurrentDir()
+{
+	TCHAR currentDir[MAX_PATH];
+	::GetCurrentDirectory(MAX_PATH, currentDir);
+	return currentDir;
+}

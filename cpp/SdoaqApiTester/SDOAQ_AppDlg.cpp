@@ -49,6 +49,7 @@ BEGIN_MESSAGE_MAP(CSDOAQ_Dlg, CDialogEx)
 	ON_MESSAGE(EUM_RECEIVE_EDOF, OnReceiveEdof)
 	ON_MESSAGE(EUM_RECEIVE_AF, OnReceiveAF)
 	ON_MESSAGE(EUM_RECEIVE_SNAP, OnReceiveSnap)
+	ON_BN_CLICKED(IDC_CHECK_SIMUL_MODE, OnCheckSimulMode)
 	ON_BN_CLICKED(IDC_INITIALIZE, OnSdoaqInitialize)
 	ON_BN_CLICKED(IDC_FINALIZE, OnSdoaqFinalize)
 	ON_CBN_SELENDOK(IDC_COMBO_PARAMETER, OnSelectedCombobox)
@@ -548,7 +549,7 @@ void CSDOAQ_Dlg::BuildEnvironment(void)
 
 	const int nMajorVersion = ::SDOAQ_GetMajorVersion();
 	const int nMinorVersion = ::SDOAQ_GetMinorVersion();
-	const int nPatchVersion = ::SDOAQ_GetPatchVersion();	
+	const int nPatchVersion = ::SDOAQ_GetPatchVersion();
 
 	SetWindowText(FString(_T("SDOAQ API TESTER (dll %d.%d.%d)"), nMajorVersion, nMinorVersion, nPatchVersion));
 
@@ -566,7 +567,15 @@ void CSDOAQ_Dlg::BuildEnvironment(void)
 	Log(FString(_T(">> Log path: %s"), m_sLogPath));
 
 	// set the cam files folder path
-	::SDOAQ_SetCamfilePath(FStringA("%s\\..\\..\\Include\\SDOAQ\\CamFiles", (CStringA)GetCurrentDir()));
+	char buf[1024];
+	if (WSIORV_SUCCESS <= WSUT_GetInstalledPath_TypeA("SDOAQ", buf, 1024))
+	{
+		::SDOAQ_SetCamfilePath(FStringA("%s\\RUN\\CamFiles", (CStringA)buf));
+	}
+	else
+	{
+		::SDOAQ_SetCamfilePath(FStringA("%s\\..\\..\\Include\\SDOAQ\\CamFiles", (CStringA)GetCurrentDir()));
+	}
 }
 
 //----------------------------------------------------------------------------
@@ -619,6 +628,18 @@ LRESULT CSDOAQ_Dlg::OnInitDone(WPARAM wErrorCode, LPARAM lpMessage)
 	}
 
 	return 0;
+}
+
+
+//----------------------------------------------------------------------------
+void CSDOAQ_Dlg::OnCheckSimulMode()
+{
+	bool flagSimulationMode = ((CButton*)GetDlgItem(IDC_CHECK_SIMUL_MODE))->GetCheck() == BST_CHECKED ? true : false;
+	::SDOAQ_SetIntParameterValue(piFullSimulationMode, flagSimulationMode);
+
+	// To apply simulation mode, SDOAQ must be re-initialized.
+	OnSdoaqFinalize();
+	OnSdoaqInitialize();
 }
 
 //----------------------------------------------------------------------------
@@ -1312,7 +1333,7 @@ void CSDOAQ_Dlg::OnSdoaqSingleShotEdof()
 		pQualityMapBuffer, qualityMapBufferSize,
 		pHeightMapBuffer, heightMapBufferSize,
 		pPointCloudBuffer, pointCloudBufferSize
-	);	
+	);
 
 	if (ecNoError == rv_sdoaq)
 	{

@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SDOAQNet.Tool;
 
 namespace SDOAQNet
 {
-    public partial class SdoaqController : IDisposable, ICamera
+	public partial class SdoaqController : IDisposable, ICamera
     {
         public enum emEofImgViewOption
         {

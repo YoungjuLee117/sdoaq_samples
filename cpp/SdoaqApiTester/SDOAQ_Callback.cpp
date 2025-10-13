@@ -70,9 +70,9 @@ void __stdcall g_InitDoneCallback(eErrorCode errorCode, char* pErrorMessage)
 //----------------------------------------------------------------------------
 static void callback_test_log(LPCTSTR sz_title, eErrorCode errorCode, void* callbackUserData)
 {
-	auto pString = new CString;
-	pString->Format(_T("%s CALLBACK <- 0x%I64X"), sz_title ? sz_title : _T(""), (unsigned long long)callbackUserData);
-	theApp.m_pMainWnd->PostMessageW(EUM_LOG, ecNoError != errorCode ? (WPARAM)lsError : (WPARAM)lsInfo, (LPARAM)pString);
+	//auto pString = new CString;
+	//pString->Format(_T("%s CALLBACK <- 0x%I64X"), sz_title ? sz_title : _T(""), (unsigned long long)callbackUserData);
+	//theApp.m_pMainWnd->PostMessageW(EUM_LOG, ecNoError != errorCode ? (WPARAM)lsError : (WPARAM)lsInfo, (LPARAM)pString);
 }
 
 //----------------------------------------------------------------------------

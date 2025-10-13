@@ -82,6 +82,9 @@ BOOL CSdoaqAutoFocusDlg::OnInitDialog()
 	g_LogLine(_T(" SDOAQ Auto Focus Sample"));
 	g_LogLine(_T("================================================"));
 
+	// set the cam files folder path
+	::SDOAQ_SetCamfilePath(FStringA("%s\\..\\..\\Include\\SDOAQ\\CamFiles", (CStringA)GetCurrentDir()));
+
 	g_LogLine(_T("start initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);
 	if (ecNoError != rv_sdoaq)

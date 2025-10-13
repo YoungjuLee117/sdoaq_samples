@@ -84,6 +84,9 @@ BOOL CSdoaqMultiFocusDlg::OnInitDialog()
 			"* You can freely IMPLEMENT your OWN Multi-Focus function.\r\n"
 			"========================================================================\r\n"));
 
+	// set the cam files folder path
+	::SDOAQ_SetCamfilePath(FStringA("%s\\..\\..\\Include\\SDOAQ\\CamFiles", (CStringA)GetCurrentDir()));
+
 	g_LogLine(_T("start initialization..."));
 	const eErrorCode rv_sdoaq = ::SDOAQ_Initialize(NULL, NULL, g_SDOAQ_InitDoneCallback);
 	if (ecNoError != rv_sdoaq)
