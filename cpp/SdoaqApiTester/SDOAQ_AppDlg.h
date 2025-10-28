@@ -14,6 +14,7 @@ enum EUserMessage
 	EUM_ERROR, // LPARAM is a pointer of CString
 	EUM_INITDONE,
 	EUM_RECEIVE_ZSTACK,
+	EUM_RECEIVE_SINGLE_FOCUS,
 	EUM_RECEIVE_EDOF,
 	EUM_RECEIVE_AF,
 	EUM_RECEIVE_SNAP,
@@ -56,6 +57,7 @@ protected:
 	afx_msg LRESULT OnUmError(WPARAM wErrorCode, LPARAM lpMessage);
 	afx_msg LRESULT OnInitDone(WPARAM wErrorCode, LPARAM lpMessage);
 	afx_msg LRESULT OnReceiveZstack(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry);
+	afx_msg LRESULT OnReceiveSingleFocus(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry);
 	afx_msg LRESULT OnReceiveEdof(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry);
 	afx_msg LRESULT OnReceiveAF(WPARAM wErrorCode, LPARAM lMsgParaReceiveAf);
 	afx_msg LRESULT OnReceiveSnap(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry);
@@ -73,6 +75,8 @@ protected:
 	afx_msg void OnSdoaqSingleShotStack();
 	afx_msg void OnSdoaqPlayStack();
 	afx_msg void OnSdoaqStopStack();
+	afx_msg void OnSdoaqPlaySingleFocus();
+	afx_msg void OnSdoaqStopSingleFocus();
 	afx_msg void OnSdoaqSingleShotEdof();
 	afx_msg void OnSdoaqPlayEdof();
 	afx_msg void OnSdoaqStopEdof();

@@ -8,6 +8,7 @@ void __stdcall g_InitDoneCallback(eErrorCode errorCode, char* pErrorMessage);
 void __stdcall g_MoveokCallback(eErrorCode errorCode, void* callbackUserData);
 void __stdcall g_PlayFocusStackCallbackEx(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData);
 void __stdcall g_PlayFocusStackCallback(eErrorCode errorCode, int lastFilledRingBufferEntry);
+void __stdcall g_PlayFocusSingleFocusCallbackEx(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData);
 void __stdcall g_PlayEdofCallbackEx(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData);
 void __stdcall g_PlayEdofCallback(eErrorCode errorCode, int lastFilledRingBufferEntry);
 void __stdcall g_PlayAFCallbackEx2(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData, double dbBestFocusStep, double dbScore, double dbMatchedStep);

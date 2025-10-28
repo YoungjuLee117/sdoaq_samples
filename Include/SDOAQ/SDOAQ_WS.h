@@ -190,6 +190,9 @@
 										- Added z250818 algorithm (SDOAQ_AM74_DLL_z250818, pi_edof_channel_count)
 										- Added new items to eFocusMeasureMethod enumeration
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 2.8.8  2025.10.21  YoungJu Lee		- Added logic to automatically select the highest-performance CUDA device when multiple GPUs are available
+										- Disabled usage of cudaHostRegister due to structural constraints in the memory management design
+	--------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 
 #pragma once

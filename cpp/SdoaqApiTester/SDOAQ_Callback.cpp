@@ -108,13 +108,23 @@ void __stdcall g_PlayFocusStackCallbackEx(eErrorCode errorCode, int lastFilledRi
 	{
 		theApp.m_pMainWnd->PostMessageW(EUM_RECEIVE_ZSTACK, (WPARAM)errorCode, (LPARAM)lastFilledRingBufferEntry);
 
-		static void* g_prev = NULL; if (g_prev != callbackUserData) { g_prev = callbackUserData; callback_test_log(_T("FOCUS"), errorCode, callbackUserData); }
+		static void* g_prev = NULL; if (g_prev != callbackUserData) { g_prev = callbackUserData; callback_test_log(_T("STACK"), errorCode, callbackUserData); }
 	}
 }
 
 void __stdcall g_PlayFocusStackCallback(eErrorCode errorCode, int lastFilledRingBufferEntry)
 {
 	g_PlayFocusStackCallbackEx(errorCode, lastFilledRingBufferEntry, NULL);
+}
+
+void __stdcall g_PlayFocusSingleFocusCallbackEx(eErrorCode errorCode, int lastFilledRingBufferEntry, void* callbackUserData)
+{
+	if (theApp.m_pMainWnd)
+	{
+		theApp.m_pMainWnd->PostMessageW(EUM_RECEIVE_SINGLE_FOCUS, (WPARAM)errorCode, (LPARAM)lastFilledRingBufferEntry);
+
+		static void* g_prev = NULL; if (g_prev != callbackUserData) { g_prev = callbackUserData; callback_test_log(_T("SINGLE FOCUS"), errorCode, callbackUserData); }
+	}
 }
 
 //----------------------------------------------------------------------------

@@ -46,6 +46,7 @@ BEGIN_MESSAGE_MAP(CSDOAQ_Dlg, CDialogEx)
 	ON_MESSAGE(EUM_ERROR, OnUmError)
 	ON_MESSAGE(EUM_INITDONE, OnInitDone)
 	ON_MESSAGE(EUM_RECEIVE_ZSTACK, OnReceiveZstack)
+	ON_MESSAGE(EUM_RECEIVE_SINGLE_FOCUS, OnReceiveSingleFocus)
 	ON_MESSAGE(EUM_RECEIVE_EDOF, OnReceiveEdof)
 	ON_MESSAGE(EUM_RECEIVE_AF, OnReceiveAF)
 	ON_MESSAGE(EUM_RECEIVE_SNAP, OnReceiveSnap)
@@ -69,6 +70,8 @@ BEGIN_MESSAGE_MAP(CSDOAQ_Dlg, CDialogEx)
 	ON_BN_CLICKED(IDC_CONTI_AF, OnSdoaqPlayAF)
 	ON_BN_CLICKED(IDC_STOP_AF, OnSdoaqStopAF)
 	ON_BN_CLICKED(IDC_SNAP, OnSdoaqSnap)
+	ON_BN_CLICKED(IDC_CONTI_SINGLE_FOCUS, OnSdoaqPlaySingleFocus)
+	ON_BN_CLICKED(IDC_STOP_SINGLE_FOCUS, OnSdoaqStopSingleFocus)
 	ON_BN_CLICKED(IDC_SET_CALIBRATION, OnSdoaqSetCalibrationFile)
 	ON_CBN_SELENDOK(IDC_COMBO_OBJECTIVE, OnSdoaqComboObjective)
 END_MESSAGE_MAP()
@@ -1263,6 +1266,80 @@ LRESULT CSDOAQ_Dlg::OnReceiveZstack(WPARAM wErrorCode, LPARAM lLastFilledRingBuf
 				ImageViewer(uid);
 			}
 		}
+	}
+
+	return 0;
+}
+
+//----------------------------------------------------------------------------
+void CSDOAQ_Dlg::OnSdoaqPlaySingleFocus()
+{
+	(void)::WSGL_Display_BG(m_hwnd3D);
+
+	if (SET.rb.active)
+	{
+		return;
+	}
+
+	auto& AFP = SET.afp;
+	auto& FOCUS = SET.focus;
+
+	if (SET.rb.ppBuf)
+	{
+		SET.ClearBuffer();
+	}
+	SET.rb.numsBuf = FOCUS.numsFocus * m_nRingBufferSize;
+	SET.rb.ppBuf = (void**)new unsigned char*[SET.rb.numsBuf];
+	SET.rb.pSizes = new size_t[SET.rb.numsBuf];
+	auto size = SET.ImgSize();
+
+	for (size_t uidx = 0; uidx < SET.rb.numsBuf; uidx++)
+	{
+		SET.rb.ppBuf[uidx] = (void*)new unsigned char[size];
+		SET.rb.pSizes[uidx] = size;
+	}
+
+	AFP.callbackUserData = (void*)::GetTickCount64();
+	const LPCTSTR sz_api = _T("SDOAQ_PlaySingleFocusEx");
+	const eErrorCode rv_sdoaq = ::SDOAQ_PlaySingleFocusEx(&AFP, g_PlayFocusSingleFocusCallbackEx, m_nRingBufferSize, (unsigned char**)SET.rb.ppBuf, SET.rb.pSizes);
+
+	if (ecNoError == rv_sdoaq)
+	{
+		SET.rb.active = true;
+	}
+	else
+	{
+		ApiError(sz_api, rv_sdoaq);
+	}
+}
+
+//----------------------------------------------------------------------------
+void CSDOAQ_Dlg::OnSdoaqStopSingleFocus()
+{
+	OnSdoaqStopStack();
+}
+
+//----------------------------------------------------------------------------
+LRESULT CSDOAQ_Dlg::OnReceiveSingleFocus(WPARAM wErrorCode, LPARAM lLastFilledRingBufferEntry)
+{
+	(void)::WSGL_Display_BG(m_hwnd3D);
+
+	if (ecNoError != wErrorCode)
+	{
+		ApiError(_T("SDOAQ_PlayCallbackEx"), (int)wErrorCode);
+	}
+	else if (SET.rb.active)
+	{		
+		(void)UpdateLastMessage(m_hWnd, EUM_RECEIVE_SINGLE_FOCUS, wErrorCode, lLastFilledRingBufferEntry);
+
+		const int base_order = (lLastFilledRingBufferEntry % (int)SET.rb.numsBuf); //m_nRingBufferSize		
+
+		++m_nContiStack;						
+		WSIOCHAR title[256];
+		int nFocus;
+		(void)::SDOAQ_GetIntParameterValue(piSingleFocus, &nFocus);
+		sprintf_s(title, sizeof title, "Single Focus(%d)", nFocus);
+		ImageViewer(0, title, m_nContiStack, SET, SET.rb.ppBuf[base_order + 0]);
 	}
 
 	return 0;
