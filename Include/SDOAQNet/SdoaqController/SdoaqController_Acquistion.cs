@@ -63,7 +63,7 @@ namespace SDOAQNet
 
             SelectMultiWS(CamIndex);
 
-            var rv = SDOAQ_API.SDOAQ_PlaySnapEx(CallBack_SDOAQ_Snap, focusList, focusList.Length, snapParams);
+            var rv = SDOAQ_API.SDOAQ_PlaySnapEx(CallBack_SDOAQ_Snap, new IntPtr(Environment.TickCount), focusList, focusList.Length, snapParams);
 
             WriteLog(Logger.emLogLevel.Info, $"Acquisition_Sanp(), Start  rv = {rv}");
             return rv != SDOAQ_API.eErrorCode.ecNoError;

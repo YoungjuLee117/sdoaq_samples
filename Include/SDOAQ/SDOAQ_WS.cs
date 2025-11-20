@@ -1659,7 +1659,7 @@ namespace SDOAQ
 
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		public static extern eErrorCode SDOAQ_PlaySnapEx(
-			SDOAQ_SnapCallbackEx snapCb,
+			SDOAQ_SnapCallbackEx snapCb, IntPtr callbackUserData,
 			int[] pPositions, int positionsCount,
 			SnapParameters[] pSnapParameters);
 
@@ -1668,7 +1668,7 @@ namespace SDOAQ
 
 		[DllImport(SDOAQ_DLL, CallingConvention = CallingConvention.Cdecl)]
 		public static extern eErrorCode SDOAQ_PlaySnap_and_StopEx(
-			SDOAQ_SnapCallbackEx snapCb,
+			SDOAQ_SnapCallbackEx snapCb, IntPtr callbackUserData,
 			int[] pPositions, int positionsCount,
 			SnapParameters[] pSnapParameters);
 
