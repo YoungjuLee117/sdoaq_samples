@@ -199,6 +199,10 @@ using System.Text;
 	 2.8.8  2025.10.21  YoungJu Lee		- Added logic to automatically select the highest-performance CUDA device when multiple GPUs are available
 										- Disabled usage of cudaHostRegister due to structural constraints in the memory management design
 	--------------------------------------------------------------------------------------------------------------------------------------------------------
+	 2.8.9  2025.11.21  YoungJu Lee		- Updated initialization criteria for CUDA algorithm
+										- Added logic to turn off all lights when active light is changed
+										- Added support for the Basler cameras boA9344-70cm and boA5328-100cm
+	--------------------------------------------------------------------------------------------------------------------------------------------------------
 */
 
 
