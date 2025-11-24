@@ -14,7 +14,7 @@
  # When operating multi-WS, specify the number of WSM and write the prefix "WSI_#" to each script item.
  # When operating single-WS, do not specify it.
  Number of WSM = 2
- Image Manager Size GB = 1 # DV=1.0 , Unit:GB
+ #Image Manager Size GB = 1 # DV=1.0 , Unit:GB
   
  # Patch
  # Patch = { item1 , item2 , ... }

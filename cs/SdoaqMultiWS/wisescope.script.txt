@@ -15,7 +15,7 @@
 
  Number of WSM = 3
 
- Image Manager Size GB = 2 # DV=1.0 , Unit:GB
+ #Image Manager Size GB = 2 # DV=1.0 , Unit:GB
   
  # Patch
  # Patch = { item1 , item2 , ... }
