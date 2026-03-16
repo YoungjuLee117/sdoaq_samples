@@ -46,6 +46,7 @@ These are sample programs that use the SDOAQ dll to acquire images and WSIO dll 
 
   * ⚠️ Set working directory to project directory.
   * ⚠️ The sample program simulates with saved image files.
+  * ⚠️ Compressed core DLL files (opencv_world4130.dll and xiapi64.dll) into a ZIP archive for distribution.
 ---
 #### [updll.bat]
   * Update required dlls to system dlls.
